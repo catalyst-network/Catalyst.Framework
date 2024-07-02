@@ -73,9 +73,8 @@ namespace Catalyst.Core.Modules.Web3
             var buildPath = Path.GetDirectoryName(executingAssembly);
             var webDirectory = Directory.CreateDirectory(Path.Combine(buildPath, "wwwroot"));
 
-            async void BuildCallback(IContainer container)
+            async void BuildCallback(ILifetimeScope scope)
             {
-                _container = container;
                 var logger = _container.Resolve<ILogger>();
                 var certificateStore = _container.Resolve<ICertificateStore>();
                 try
@@ -89,26 +88,25 @@ namespace Catalyst.Core.Modules.Web3
                             {
                                 webHostBuilder
                                    .ConfigureServices(ConfigureServices)
-                                   .Configure(Configure)
-                                   .UseWebRoot(webDirectory.FullName)
-                                   .ConfigureKestrel(options =>
+                               .Configure(Configure)
+                               .UseWebRoot(webDirectory.FullName)
+                               .ConfigureKestrel(options =>
+                               {
+                                   if (_httpsOptions != null)
                                    {
-                                       if (_httpsOptions != null)
+                                       var certificate = certificateStore.ReadOrCreateCertificateFile(_httpsOptions.CertificateName);
+                                       options.Listen(_httpsOptions.BindingAddress, listenOptions =>
                                        {
-                                           var certificate = certificateStore.ReadOrCreateCertificateFile(_httpsOptions.CertificateName);
-                                           options.Listen(_httpsOptions.BindingAddress, listenOptions =>
-                                           {
-                                               listenOptions.UseHttps(certificate);
-                                           });
-                                           options.ConfigureHttpsDefaults(o => o.ClientCertificateMode = ClientCertificateMode.RequireCertificate);
-                                       }
+                                           listenOptions.UseHttps(certificate);
+                                       });
+                                       options.ConfigureHttpsDefaults(o => o.ClientCertificateMode = ClientCertificateMode.RequireCertificate);
+                                   }
 
-                                       if (_httpOptions != null)
-                                       {
-                                           options.Listen(_httpOptions.BindingAddress);
-                                       }
-                                   })
-                                   .UseSerilog();
+                                   if (_httpOptions != null)
+                                   {
+                                       options.Listen(_httpOptions.BindingAddress);
+                                   }
+                               });
                             }).RunConsoleAsync();
 
                     //SIGINT is caught from kestrel because we are using RunConsoleAsync in HostBuilder, the SIGINT will not be received in the main console so we need to exit the process manually, to prevent needing to use two SIGINT's
@@ -215,9 +213,6 @@ namespace Catalyst.Core.Modules.Web3
 
             public IServiceProvider CreateServiceProvider(ContainerBuilder containerBuilder)
             {
-                // using an obsolete way of updating an already created container
-                containerBuilder.Update(_container);
-
                 return new AutofacServiceProvider(_container);
             }
         }

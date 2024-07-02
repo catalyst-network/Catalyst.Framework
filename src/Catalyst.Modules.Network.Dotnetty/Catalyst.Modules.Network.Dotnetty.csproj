@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DnsClient" Version="1.2.0" />
-        <PackageReference Include="DotNetty.Transport" Version="0.6.0" />
-        <PackageReference Include="Google.Protobuf" Version="3.9.1" />
+        <PackageReference Include="DnsClient" Version="1.8.0" />
+        <PackageReference Include="DotNetty.Transport" Version="0.7.6" />
+        <PackageReference Include="Google.Protobuf" Version="3.27.2" />
         <PackageReference Include="Makaretu.Dns.Unicast" Version="0.11.1" />
     </ItemGroup>
 

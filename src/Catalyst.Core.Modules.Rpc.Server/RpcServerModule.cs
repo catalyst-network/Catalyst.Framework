@@ -41,7 +41,7 @@ namespace Catalyst.Core.Modules.Rpc.Server
             builder.RegisterType<RpcServer>().As<IRpcServer>().SingleInstance();
             builder.RegisterType<RpcServerSettings>().As<IRpcServerSettings>();
 
-            async void BuildCallback(IContainer container)
+            async void BuildCallback(ILifetimeScope container)
             {
                 if (container == null)
                 {

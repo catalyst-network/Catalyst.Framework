@@ -93,7 +93,7 @@ namespace Catalyst.Core.Lib.FileSystem
 
         private async Task<IFileInfo> WriteFileToPathAsync(string path, string contents)
         {
-            var fileInfo = FileInfo.FromFileName(path);
+            var fileInfo = FileInfo.New(path);
             if (!Directory.Exists(fileInfo.DirectoryName))
             {
                 Directory.CreateDirectory(fileInfo.DirectoryName);
@@ -105,7 +105,7 @@ namespace Catalyst.Core.Lib.FileSystem
                 await file.FlushAsync().ConfigureAwait(false);
             }
 
-            return FileInfo.FromFileName(path);
+            return fileInfo;
         }
 
         public bool DataFileExists(string fileName)

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>Catalyst.Core.Modules.Web3</RootNamespace>
         <Authors>James Kirby (nshcore@protonmail.com)</Authors>
         <SignAssembly>true</SignAssembly>
@@ -18,14 +18,14 @@
       <ProjectReference Include="..\Catalyst.Core.Modules.Mempool\Catalyst.Core.Modules.Mempool.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.3.1" />
-        <PackageReference Include="Google.Protobuf" Version="3.9.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-        <PackageReference Include="Serilog.AspNetCore" Version="3.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="5.0.0-rc4" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.0.0-rc4" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.0.0-rc4" />
-        <PackageReference Include="AutofacSerilogIntegration" Version="2.0.0" />
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+        <PackageReference Include="Google.Protobuf" Version="3.27.2" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.6.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
+        <PackageReference Include="AutofacSerilogIntegration" Version="5.0.0" />
     </ItemGroup>
 </Project>

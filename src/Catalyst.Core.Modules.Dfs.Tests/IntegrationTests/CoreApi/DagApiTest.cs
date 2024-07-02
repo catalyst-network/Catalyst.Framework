@@ -32,7 +32,7 @@ using NUnit.Framework;
 namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
 {
     [TestFixture]
-    [Category(Traits.IntegrationTest)] 
+    [Category(Traits.IntegrationTest)]
     public sealed class DagApiTest
     {
         private readonly byte[] _blob = Encoding.UTF8.GetBytes("blorb");
@@ -48,10 +48,10 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
         public async Task Get_Raw()
         {
             var cid = await _dfs.BlockApi.PutAsync(_blob, contentType: "raw");
-            Assert.AreEqual("bafkreiaxnnnb7qz2focittuqq3ya25q7rcv3bqynnczfzako47346wosmu", cid.ToString());
+            Assert.That(cid.ToString(), Is.EqualTo("bafkreiaxnnnb7qz2focittuqq3ya25q7rcv3bqynnczfzako47346wosmu"));
 
             var dag = await _dfs.DagApi.GetAsync(cid);
-            Assert.AreEqual(Blob64, (string) dag["data"]);
+            Assert.That((string)dag["data"], Is.EqualTo(Blob64));
         }
 
         private sealed class Name
@@ -63,34 +63,34 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
         [Test]
         public async Task PutAndGet_JSON()
         {
-            var expected = new JObject {["a"] = "alpha"};
+            var expected = new JObject { ["a"] = "alpha" };
             const string expectedId = "bafyreigdhej736dobd6z3jt2vxsxvbwrwgyts7e7wms6yrr46rp72uh5bu";
             var id = await _dfs.DagApi.PutAsync(expected);
-            Assert.NotNull(id);
-            Assert.AreEqual(expectedId, id.ToString());
+            Assert.That(id, Is.Not.Null);
+            Assert.That(id.ToString(), Is.EqualTo(expectedId));
 
             var actual = await _dfs.DagApi.GetAsync(id);
-            Assert.NotNull(actual);
-            Assert.AreEqual(expected["a"], actual["a"]);
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(expected["a"], Is.EqualTo(actual["a"]));
 
-            var value = (string) await _dfs.DagApi.GetAsync(expectedId + "/a");
-            Assert.AreEqual(expected["a"].ToString(), value);
+            var value = (string)await _dfs.DagApi.GetAsync(expectedId + "/a");
+            Assert.That(expected["a"].ToString(), Is.EqualTo(value));
         }
 
         [Test]
         public async Task PutAndGet_poco()
         {
-            var expected = new Name {First = "John", Last = "Smith"};
+            var expected = new Name { First = "John", Last = "Smith" };
             var id = await _dfs.DagApi.PutAsync(expected);
-            Assert.NotNull(id);
+            Assert.That(id, Is.Not.Null);
 
             var actual = await _dfs.DagApi.GetAsync<Name>(id);
-            Assert.NotNull(actual);
-            Assert.AreEqual(expected.First, actual.First);
-            Assert.AreEqual(expected.Last, actual.Last);
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(expected.First, Is.EqualTo(actual.First));
+            Assert.That(expected.Last, Is.EqualTo(actual.Last));
 
-            var value = (string) await _dfs.DagApi.GetAsync(id.Encode() + "/Last");
-            Assert.AreEqual(expected.Last, value);
+            var value = (string)await _dfs.DagApi.GetAsync(id.Encode() + "/Last");
+            Assert.That(expected.Last, Is.EqualTo(value));
         }
 
         /// <summary>
@@ -100,35 +100,35 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
         [Test]
         public async Task PutAndGet_poco_CidEncoding()
         {
-            var expected = new Name {First = "John", Last = "Smith"};
+            var expected = new Name { First = "John", Last = "Smith" };
             var id = await _dfs.DagApi.PutAsync(expected, encoding: "base32");
-            Assert.NotNull(id);
-            Assert.AreEqual("base32", id.Encoding);
-            Assert.AreEqual(1, id.Version);
+            Assert.That(id, Is.Not.Null);
+            Assert.That(id.Encoding, Is.EqualTo("base32"));
+            Assert.That(id.Version, Is.EqualTo(1));
 
             var actual = await _dfs.DagApi.GetAsync<Name>(id);
-            Assert.NotNull(actual);
-            Assert.AreEqual(expected.First, actual.First);
-            Assert.AreEqual(expected.Last, actual.Last);
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(expected.First, Is.EqualTo(actual.First));
+            Assert.That(expected.Last, Is.EqualTo(actual.Last));
 
-            var value = (string) await _dfs.DagApi.GetAsync(id.Encode() + "/Last");
-            Assert.AreEqual(expected.Last, value);
+            var value = (string)await _dfs.DagApi.GetAsync(id.Encode() + "/Last");
+            Assert.That(expected.Last, Is.EqualTo(value));
         }
 
         [Test]
         public async Task PutAndGet_POCO()
         {
-            var expected = new Name {First = "John", Last = "Smith"};
+            var expected = new Name { First = "John", Last = "Smith" };
             var id = await _dfs.DagApi.PutAsync(expected);
-            Assert.NotNull(id);
+            Assert.That(id, Is.Not.Null);
 
             var actual = await _dfs.DagApi.GetAsync<Name>(id);
-            Assert.NotNull(actual);
-            Assert.AreEqual(expected.First, actual.First);
-            Assert.AreEqual(expected.Last, actual.Last);
+            Assert.That(actual, Is.Not.Null);
+            Assert.That(expected.First, Is.EqualTo(actual.First));
+            Assert.That(expected.Last, Is.EqualTo(actual.Last));
 
-            var value = (string) await _dfs.DagApi.GetAsync(id.Encode() + "/Last");
-            Assert.AreEqual(expected.Last, value);
+            var value = (string)await _dfs.DagApi.GetAsync(id.Encode() + "/Last");
+            Assert.That(expected.Last, Is.EqualTo(value));
         }
 
         [Test]
@@ -136,10 +136,10 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
         {
             var data = Encoding.UTF8.GetBytes("abc");
             var id = await _dfs.BlockApi.PutAsync(data, "raw");
-            Assert.AreEqual("bafkreif2pall7dybz7vecqka3zo24irdwabwdi4wc55jznaq75q7eaavvu", id.Encode());
+            Assert.That(id.Encode(), Is.EqualTo("bafkreif2pall7dybz7vecqka3zo24irdwabwdi4wc55jznaq75q7eaavvu"));
 
             var actual = await _dfs.DagApi.GetAsync(id);
-            Assert.AreEqual(Convert.ToBase64String(data), (string) actual["data"]);
+            Assert.That(Convert.ToBase64String(data), Is.EqualTo((string)actual["data"]));
         }
 
         // // https://github.com/ipfs/interface-ipfs-core/blob/master/SPEC/DAG.md

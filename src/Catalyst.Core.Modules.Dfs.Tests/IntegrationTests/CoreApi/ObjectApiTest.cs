@@ -46,17 +46,17 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
         public async Task New_Template_Null()
         {
             var node = await ipfs.ObjectApi.NewAsync();
-            Assert.AreEqual("QmdfTbBqBPQ7VNxZEYEj14VmRuZBkqFbiwReogJgS1zR1n", node.Id.ToString());
+            Assert.That(node.Id.ToString(), Is.EqualTo("QmdfTbBqBPQ7VNxZEYEj14VmRuZBkqFbiwReogJgS1zR1n"));
         }
 
         [Test]
         public async Task New_Template_UnixfsDir()
         {
             var node = await ipfs.ObjectApi.NewAsync("unixfs-dir");
-            Assert.AreEqual("QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn", node.Id.ToString());
+            Assert.That(node.Id.ToString(), Is.EqualTo("QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn"));
 
             node = await ipfs.ObjectApi.NewDirectoryAsync();
-            Assert.AreEqual("QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn", node.Id.ToString());
+            Assert.That(node.Id.ToString(), Is.EqualTo("QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn"));
         }
 
         [Test]
@@ -74,14 +74,14 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
             var adata = Encoding.UTF8.GetBytes("alpha");
             var bdata = Encoding.UTF8.GetBytes("beta");
             var alpha = new DagNode(adata);
-            var beta = new DagNode(bdata, new[] {alpha.ToLink()});
+            var beta = new DagNode(bdata, new[] { alpha.ToLink() });
             var x = await ipfs.ObjectApi.PutAsync(beta);
             var node = await ipfs.ObjectApi.GetAsync(x.Id);
-            Assert.AreEqual(beta.DataBytes, node.DataBytes);
-            Assert.AreEqual(beta.Links.Count(), node.Links.Count());
-            Assert.AreEqual(beta.Links.First().Id, node.Links.First().Id);
-            Assert.AreEqual(beta.Links.First().Name, node.Links.First().Name);
-            Assert.AreEqual(beta.Links.First().Size, node.Links.First().Size);
+            Assert.That(beta.DataBytes, Is.EqualTo(node.DataBytes));
+            Assert.That(beta.Links.Count(), Is.EqualTo(node.Links.Count()));
+            Assert.That(beta.Links.First().Id, Is.EqualTo(node.Links.First().Id));
+            Assert.That(beta.Links.First().Name, Is.EqualTo(node.Links.First().Name));
+            Assert.That(beta.Links.First().Size, Is.EqualTo(node.Links.First().Size));
         }
 
         [Test]
@@ -90,13 +90,13 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
             var adata = Encoding.UTF8.GetBytes("alpha");
             var bdata = Encoding.UTF8.GetBytes("beta");
             var alpha = new DagNode(adata);
-            var beta = await ipfs.ObjectApi.PutAsync(bdata, new[] {alpha.ToLink()});
+            var beta = await ipfs.ObjectApi.PutAsync(bdata, new[] { alpha.ToLink() });
             var node = await ipfs.ObjectApi.GetAsync(beta.Id);
-            Assert.AreEqual(beta.DataBytes, node.DataBytes);
-            Assert.AreEqual(beta.Links.Count(), node.Links.Count());
-            Assert.AreEqual(beta.Links.First().Id, node.Links.First().Id);
-            Assert.AreEqual(beta.Links.First().Name, node.Links.First().Name);
-            Assert.AreEqual(beta.Links.First().Size, node.Links.First().Size);
+            Assert.That(beta.DataBytes, Is.EqualTo(node.DataBytes));
+            Assert.That(beta.Links.Count(), Is.EqualTo(node.Links.Count()));
+            Assert.That(beta.Links.First().Id, Is.EqualTo(node.Links.First().Id));
+            Assert.That(beta.Links.First().Name, Is.EqualTo(node.Links.First().Name));
+            Assert.That(beta.Links.First().Size, Is.EqualTo(node.Links.First().Size));
         }
 
         [Test]
@@ -108,7 +108,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
             {
                 var bdata = new byte[adata.Length];
                 stream.Read(bdata, 0, bdata.Length);
-                Assert.AreEqual(adata, bdata);
+                Assert.That(adata, Is.EqualTo(bdata));
             }
         }
 
@@ -118,12 +118,12 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
             var adata = Encoding.UTF8.GetBytes("alpha");
             var bdata = Encoding.UTF8.GetBytes("beta");
             var alpha = new DagNode(adata);
-            var beta = await ipfs.ObjectApi.PutAsync(bdata, new[] {alpha.ToLink()});
+            var beta = await ipfs.ObjectApi.PutAsync(bdata, new[] { alpha.ToLink() });
             var links = await ipfs.ObjectApi.LinksAsync(beta.Id);
-            Assert.AreEqual(beta.Links.Count(), links.Count());
-            Assert.AreEqual(beta.Links.First().Id, links.First().Id);
-            Assert.AreEqual(beta.Links.First().Name, links.First().Name);
-            Assert.AreEqual(beta.Links.First().Size, links.First().Size);
+            Assert.That(beta.Links.Count(), Is.EqualTo(links.Count()));
+            Assert.That(beta.Links.First().Id, Is.EqualTo(links.First().Id));
+            Assert.That(beta.Links.First().Name, Is.EqualTo(links.First().Name));
+            Assert.That(beta.Links.First().Size, Is.EqualTo(links.First().Size));
         }
 
         [Test]
@@ -133,13 +133,13 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
             var data2 = Encoding.UTF8.GetBytes("Some data 2");
             var node2 = new DagNode(data2);
             var node1 = await ipfs.ObjectApi.PutAsync(data1,
-                new[] {node2.ToLink("some-link")});
+                new[] { node2.ToLink("some-link") });
             var info = await ipfs.ObjectApi.StatAsync(node1.Id);
-            Assert.AreEqual(1, info.LinkCount);
-            Assert.AreEqual(11, info.DataSize);
-            Assert.AreEqual(64, info.BlockSize);
-            Assert.AreEqual(53, info.LinkSize);
-            Assert.AreEqual(77, info.CumulativeSize);
+            Assert.That(info.LinkCount, Is.EqualTo(1));
+            Assert.That(info.DataSize, Is.EqualTo(11));
+            Assert.That(info.BlockSize, Is.EqualTo(64));
+            Assert.That(info.LinkSize, Is.EqualTo(53));
+            Assert.That(info.CumulativeSize, Is.EqualTo(77));
         }
 
         [Test]
@@ -171,11 +171,11 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
                 ipfs.Options.Block.AllowInlineCid = true;
 
                 var node = await ipfs.UnixFsApi.AddTextAsync("hiya");
-                Assert.AreEqual(1, node.Id.Version);
-                Assert.True(node.Id.Hash.IsIdentityHash);
+                Assert.That(node.Id.Version, Is.EqualTo(1));
+                Assert.That(node.Id.Hash.IsIdentityHash, Is.True);
 
                 var dag = await ipfs.ObjectApi.GetAsync(node.Id);
-                Assert.AreEqual(12, dag.Size);
+                Assert.That(dag.Size, Is.EqualTo(12));
             }
             finally
             {
@@ -192,11 +192,11 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
                 ipfs.Options.Block.AllowInlineCid = true;
 
                 var node = await ipfs.UnixFsApi.AddTextAsync("hiya");
-                Assert.AreEqual(1, node.Id.Version);
-                Assert.True(node.Id.Hash.IsIdentityHash);
+                Assert.That(node.Id.Version, Is.EqualTo(1));
+                Assert.That(node.Id.Hash.IsIdentityHash, Is.True);
 
                 var links = await ipfs.ObjectApi.LinksAsync(node.Id);
-                Assert.AreEqual(0, links.Count());
+                Assert.That(links.Count(), Is.EqualTo(0));
             }
             finally
             {
@@ -211,7 +211,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.CoreApi
             var cid = await ipfs.BlockApi.PutAsync(blob, "raw");
 
             var links = await ipfs.ObjectApi.LinksAsync(cid);
-            Assert.AreEqual(0, links.Count());
+            Assert.That(links.Count(), Is.EqualTo(0));
         }
     }
 }

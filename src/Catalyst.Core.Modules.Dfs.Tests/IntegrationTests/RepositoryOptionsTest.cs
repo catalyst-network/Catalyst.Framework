@@ -35,13 +35,13 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
         public void Defaults()
         {
             var options = new RepositoryOptions();
-            Assert.NotNull(options.Folder);
+            Assert.That(options.Folder, Is.Not.Null);
         }
 
         [Test]
         public void Environment_Home()
         {
-            var names = new[] {"IPFS_PATH", "HOME", "HOMEPATH"};
+            var names = new[] { "IPFS_PATH", "HOME", "HOMEPATH" };
             var values = names.Select(Environment.GetEnvironmentVariable);
             var sep = Path.DirectorySeparatorChar;
             try
@@ -53,15 +53,15 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
 
                 Environment.SetEnvironmentVariable("HOME", $"{sep}home1");
                 var options = new RepositoryOptions();
-                Assert.AreEqual($"{sep}home1{sep}.catalyst", options.Folder);
+                Assert.That($"{sep}home1{sep}.catalyst", Is.EqualTo(options.Folder));
 
                 Environment.SetEnvironmentVariable("HOME", $"{sep}home2{sep}");
                 options = new RepositoryOptions();
-                Assert.AreEqual($"{sep}home2{sep}.catalyst", options.Folder);
+                Assert.That($"{sep}home2{sep}.catalyst", Is.EqualTo(options.Folder));
             }
             finally
             {
-                var pairs = names.Zip(values, (name, value) => new {name, value});
+                var pairs = names.Zip(values, (name, value) => new { name, value });
                 foreach (var pair in pairs)
                 {
                     Environment.SetEnvironmentVariable(pair.name, pair.value);
@@ -72,7 +72,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
         [Test]
         public void Environment_HomePath()
         {
-            var names = new[] {"IPFS_PATH", "HOME", "HOMEPATH"};
+            var names = new[] { "IPFS_PATH", "HOME", "HOMEPATH" };
             var values = names.Select(Environment.GetEnvironmentVariable);
             var sep = Path.DirectorySeparatorChar;
             try
@@ -84,15 +84,15 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
 
                 Environment.SetEnvironmentVariable("HOMEPATH", $"{sep}home1");
                 var options = new RepositoryOptions();
-                Assert.AreEqual($"{sep}home1{sep}.catalyst", options.Folder);
+                Assert.That($"{sep}home1{sep}.catalyst", Is.EqualTo(options.Folder));
 
                 Environment.SetEnvironmentVariable("HOMEPATH", $"{sep}home2{sep}");
                 options = new RepositoryOptions();
-                Assert.AreEqual($"{sep}home2{sep}.catalyst", options.Folder);
+                Assert.That($"{sep}home2{sep}.catalyst", Is.EqualTo(options.Folder));
             }
             finally
             {
-                var pairs = names.Zip(values, (name, value) => new {name, value});
+                var pairs = names.Zip(values, (name, value) => new { name, value });
                 foreach (var pair in pairs)
                 {
                     Environment.SetEnvironmentVariable(pair.name, pair.value);
@@ -103,7 +103,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
         [Test]
         public void Environment_IpfsPath()
         {
-            var names = new[] {"IPFS_PATH", "HOME", "HOMEPATH"};
+            var names = new[] { "IPFS_PATH", "HOME", "HOMEPATH" };
             var values = names.Select(Environment.GetEnvironmentVariable);
             var sep = Path.DirectorySeparatorChar;
             try
@@ -115,15 +115,15 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
 
                 Environment.SetEnvironmentVariable("IPFS_PATH", $"{sep}x1");
                 var options = new RepositoryOptions();
-                Assert.AreEqual($"{sep}x1", options.Folder);
+                Assert.That($"{sep}x1", Is.EqualTo(options.Folder));
 
                 Environment.SetEnvironmentVariable("IPFS_PATH", $"{sep}x2{sep}");
                 options = new RepositoryOptions();
-                Assert.AreEqual($"{sep}x2{sep}", options.Folder);
+                Assert.That($"{sep}x2{sep}", Is.EqualTo(options.Folder));
             }
             finally
             {
-                var pairs = names.Zip(values, (name, value) => new {name, value});
+                var pairs = names.Zip(values, (name, value) => new { name, value });
                 foreach (var pair in pairs)
                 {
                     Environment.SetEnvironmentVariable(pair.name, pair.value);

@@ -46,7 +46,7 @@ using Serilog;
 namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
 {
     [TestFixture]
-    [Category(Traits.IntegrationTest)] 
+    [Category(Traits.IntegrationTest)]
     public sealed class DfsServiceTests : FileSystemBasedTest
     {
         private IDfsService _dfs1;
@@ -106,7 +106,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
             var seeds = (await _dfs1.BootstrapApi.ListAsync().ConfigureAwait(false))
                .Select(a => a.PeerId)
                .ToArray();
-            Assert.True(seeds.Length > 0, "no seed nodes defined");
+            Assert.That(seeds.Length > 0, Is.True, "no seed nodes defined");
 
             // Wait for a connection to a seed node.
             var start = DateTime.Now;
@@ -114,7 +114,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
             var found = false;
             while (!found)
             {
-                Assert.True(DateTime.Now <= end, "timeout");
+                Assert.That(DateTime.Now <= end, Is.True, "timeout");
                 var peers = await _dfs1.SwarmApi.PeersAsync().ConfigureAwait(false);
                 found = peers.Any(p => seeds.Contains(p.Id));
                 await Task.Delay(100).ConfigureAwait(false);
@@ -130,30 +130,30 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
             using var node = TestDfs.GetTestDfs();
             await node.StartAsync();
         }
-        
+
         [Test]
         public async Task Can_Start_And_Stop()
         {
             var peer = _dfs1.LocalPeer;
 
-            Assert.False(_dfs1.IsStarted);
+            Assert.That(_dfs1.IsStarted, Is.False);
             await _dfs1.StartAsync();
-            Assert.True(_dfs1.IsStarted);
-            Assert.AreNotEqual(0, peer.Addresses.Count());
+            Assert.That(_dfs1.IsStarted, Is.True);
+            Assert.That(peer.Addresses.Count(), Is.Not.EqualTo(0));
             await _dfs1.StopAsync();
-            Assert.False(_dfs1.IsStarted);
-            Assert.AreEqual(0, peer.Addresses.Count());
+            Assert.That(_dfs1.IsStarted, Is.False);
+            Assert.That(peer.Addresses.Count(), Is.EqualTo(0));
 
             await _dfs1.StartAsync();
-            Assert.AreNotEqual(0, peer.Addresses.Count());
+            Assert.That(peer.Addresses.Count(), Is.Not.EqualTo(0));
             await _dfs1.StopAsync();
-            Assert.AreEqual(0, peer.Addresses.Count());
+            Assert.That(peer.Addresses.Count(), Is.EqualTo(0));
 
             await _dfs1.StartAsync();
-            Assert.AreNotEqual(0, peer.Addresses.Count());
+            Assert.That(peer.Addresses.Count(), Is.Not.EqualTo(0));
             ExceptionAssert.Throws<Exception>(() => _dfs1.StartAsync().Wait());
             await _dfs1.StopAsync();
-            Assert.AreEqual(0, peer.Addresses.Count());
+            Assert.That(peer.Addresses.Count(), Is.EqualTo(0));
         }
 
         [Test]
@@ -165,14 +165,14 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
             for (int n = 0; n < 3; ++n)
             {
                 await _dfs1.StartAsync();
-                Assert.AreNotEqual(0, peer1.Addresses.Count());
+                Assert.That(peer1.Addresses.Count(), Is.Not.EqualTo(0));
                 await _dfs2.StartAsync();
-                Assert.AreNotEqual(0, peer2.Addresses.Count());
+                Assert.That(peer2.Addresses.Count(), Is.Not.EqualTo(0));
 
                 await _dfs2.StopAsync();
-                Assert.AreEqual(0, peer2.Addresses.Count());
+                Assert.That(peer2.Addresses.Count(), Is.EqualTo(0));
                 await _dfs1.StopAsync();
-                Assert.AreEqual(0, peer1.Addresses.Count());
+                Assert.That(peer1.Addresses.Count(), Is.EqualTo(0));
             }
         }
 
@@ -196,7 +196,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
                 Task.Run(() => _dfs1.LocalPeer)
             };
             var r = await Task.WhenAll(tasks);
-            Assert.AreEqual(r[0], r[1]);
+            Assert.That(r[0], Is.EqualTo(r[1]));
         }
 
         [Test]
@@ -208,7 +208,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests
                 Task.Run(() => _dfs1.KeyApi)
             };
             var r = await Task.WhenAll(tasks);
-            Assert.AreEqual(r[0], r[1]);
+            Assert.That(r[0], Is.EqualTo(r[1]));
         }
 
         //todo

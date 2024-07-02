@@ -55,7 +55,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.BlockExchange
         public void WantList()
         {
             var bitSwapService = new BitSwapService(new SwarmService(_self));
-            Assert.AreEqual(0, bitSwapService.PeerWants(_self.Id).Count());
+            Assert.That(bitSwapService.PeerWants(_self.Id).Count(), Is.EqualTo(0));
 
             var cid = new DagNode(Encoding.UTF8.GetBytes("BitswapTest unknown block")).Id;
             var cancel = new CancellationTokenSource();
@@ -76,7 +76,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.BlockExchange
             bitSwapService.PeerWants(_self.Id).ToArray().Should().Contain(cid);
 
             cancel.Cancel();
-            Assert.True(task.IsCanceled);
+            Assert.That(task.IsCanceled, Is.True);
 
             bitSwapService.PeerWants(_self.Id).ToArray().Should().NotContain(cid);
         }
@@ -92,7 +92,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.BlockExchange
 
             bitSwapService.BlockNeeded += (s, e) =>
             {
-                Assert.True(cid1 == e.Id || cid2 == e.Id);
+                Assert.That(cid1 == e.Id || cid2 == e.Id, Is.True);
                 ++callCount;
             };
             try
@@ -101,7 +101,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.BlockExchange
                 bitSwapService.WantAsync(cid1, _self.Id, cancel.Token);
                 bitSwapService.WantAsync(cid2, _self.Id, cancel.Token);
                 bitSwapService.WantAsync(cid2, _self.Id, cancel.Token);
-                Assert.AreEqual(2, callCount);
+                Assert.That(callCount, Is.EqualTo(2));
             }
             finally
             {
@@ -120,7 +120,7 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.BlockExchange
             bitSwapService.PeerWants(_self.Id).ToArray().Should().Contain(cid);
 
             bitSwapService.Unwant(cid);
-            Assert.True(task.IsCanceled);
+            Assert.That(task.IsCanceled, Is.True);
             bitSwapService.PeerWants(_self.Id).ToArray().Should().NotContain(cid);
         }
 
@@ -128,21 +128,21 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.BlockExchange
         public void Found()
         {
             var bitSwapService = new BitSwapService(new SwarmService(_self));
-            Assert.AreEqual(0, bitSwapService.PeerWants(_self.Id).Count());
+            Assert.That(bitSwapService.PeerWants(_self.Id).Count(), Is.EqualTo(0));
 
             var a = new DagNode(Encoding.UTF8.GetBytes("BitswapTest found block a"));
             var b = new DagNode(Encoding.UTF8.GetBytes("BitswapTest found block b"));
             var cancel = new CancellationTokenSource();
             var task = bitSwapService.WantAsync(a.Id, _self.Id, cancel.Token);
-            Assert.False(task.IsCompleted);
+            Assert.That(task.IsCompleted, Is.False);
             bitSwapService.PeerWants(_self.Id).ToArray().Should().Contain(a.Id);
 
             bitSwapService.Found(b);
-            Assert.False(task.IsCompleted);
+            Assert.That(task.IsCompleted, Is.False);
             bitSwapService.PeerWants(_self.Id).ToArray().Should().Contain(a.Id);
 
             bitSwapService.Found(a);
-            Assert.True(task.IsCompleted);
+            Assert.That(task.IsCompleted, Is.True);
             bitSwapService.PeerWants(_self.Id).ToArray().Should().NotContain(a.Id);
             a.DataBytes.Should().Contain(task.Result.DataBytes);
         }
@@ -153,15 +153,15 @@ namespace Catalyst.Core.Modules.Dfs.Tests.IntegrationTests.BlockExchange
             var bitSwapService = new BitSwapService(new SwarmService(_self));
 
             var a = new DagNode(Encoding.UTF8.GetBytes("BitswapTest found block a"));
-            Assert.AreEqual(0, bitSwapService.Found(a));
+            Assert.That(bitSwapService.Found(a), Is.EqualTo(0));
 
             var cancel = new CancellationTokenSource();
             var task1 = bitSwapService.WantAsync(a.Id, _self.Id, cancel.Token);
             var task2 = bitSwapService.WantAsync(a.Id, _self.Id, cancel.Token);
-            Assert.AreEqual(2, bitSwapService.Found(a));
+            Assert.That(bitSwapService.Found(a), Is.EqualTo(2));
 
-            Assert.True(task1.IsCompleted);
-            Assert.True(task2.IsCompleted);
+            Assert.That(task1.IsCompleted, Is.True);
+            Assert.That(task2.IsCompleted, Is.True);
         }
     }
 }
