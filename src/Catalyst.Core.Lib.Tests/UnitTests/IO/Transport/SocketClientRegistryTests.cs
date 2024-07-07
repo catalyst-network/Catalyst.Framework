@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
+using Catalyst.Abstractions.P2P;
 using Catalyst.Core.Lib.IO.Events;
 using Catalyst.Modules.Network.Dotnetty.Abstractions.IO.Transport;
 using Catalyst.Modules.Network.Dotnetty.IO.Transport;
@@ -134,21 +135,21 @@ namespace Catalyst.Core.Lib.Tests.UnitTests.IO.Transport
         public void Can_init_rcp_client_registry()
         {
             var socketRegistry = new SocketClientRegistry<IRpcClient>();
-            Assert.AreEqual(socketRegistry.GetRegistryType(), typeof(IRpcClient).Name);
+            Assert.Equals(socketRegistry.GetRegistryType(), typeof(IPeerClient).Name);
         }
 
         [Test]
         public void Can_init_tcp_client_registry()
         {
             var socketRegistry = new SocketClientRegistry<ITcpClient>();
-            Assert.AreEqual(socketRegistry.GetRegistryType(), typeof(ITcpClient).Name);
+            Assert.Equals(socketRegistry.GetRegistryType(), typeof(IRpcClient).Name);
         }
 
         [Test]
         public void Can_init_udp_client_registry()
         {
             var socketRegistry = new SocketClientRegistry<IUdpClient>();
-            Assert.AreEqual(socketRegistry.GetRegistryType(), typeof(IUdpClient).Name);
+            Assert.Equals(socketRegistry.GetRegistryType(), typeof(ITcpClient).Name);
         }
 
         [Test]

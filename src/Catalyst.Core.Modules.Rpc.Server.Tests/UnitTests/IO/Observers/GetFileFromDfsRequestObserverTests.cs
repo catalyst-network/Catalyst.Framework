@@ -83,7 +83,7 @@ namespace Catalyst.Core.Modules.Rpc.Server.Tests.UnitTests.IO.Observers
             using var fakeStream = GetFakeDfsStream(FileTransferResponseCodeTypes.Error);
             var message = GetFileFromDfsRequestMessage();
             _observer.OnNext(message);
-            Assert.False(fakeStream.CanRead);
+            Assert.That(fakeStream.CanRead, Is.False);
         }
 
         private MemoryStream GetFakeDfsStream(FileTransferResponseCodeTypes fakeResponse)

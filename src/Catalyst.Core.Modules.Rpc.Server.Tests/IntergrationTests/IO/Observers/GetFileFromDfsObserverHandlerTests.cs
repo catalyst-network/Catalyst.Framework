@@ -123,8 +123,7 @@ namespace Catalyst.Core.Modules.Rpc.Server.Tests.IntegrationTests.IO.Observers
                 }
 
                 await TaskHelper.WaitForAsync(() => fileDownloadInformation.IsCompleted, TimeSpan.FromSeconds(10));
-
-                Assert.AreEqual(crcValue, FileHelper.GetCrcValue(fileDownloadInformation.TempPath));
+                Assert.That(FileHelper.GetCrcValue(fileDownloadInformation.TempPath), Is.EqualTo(crcValue));
             }
             finally
             {

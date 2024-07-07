@@ -48,7 +48,7 @@ namespace Catalyst.Core.Lib.Tests.UnitTests.IO.Messaging.Dto
         [Test]
         public void CanInitMessageDtoCorrectly()
         {
-            Assert.NotNull(_messageDto);
+            Assert.That(_messageDto, Is.Null);
 
             _messageDto.Should().BeOfType<MessageDto>();
             _messageDto.Content.Should().NotBeNull().And.BeAssignableTo(typeof(IMessage<ProtocolMessage>));

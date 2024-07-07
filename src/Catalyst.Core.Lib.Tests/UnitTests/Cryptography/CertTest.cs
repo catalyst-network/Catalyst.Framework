@@ -63,10 +63,10 @@ namespace Catalyst.Core.Lib.Tests.UnitTests.Cryptography
             try
             {
                 var cert = await _keyStoreService.CreateBcCertificateAsync(key.Name);
-                Assert.AreEqual($"CN={key.Id},OU=keystore,O=ipfs", cert.SubjectDN.ToString());
+                Assert.Equals($"CN={key.Id},OU=keystore,O=ipfs", cert.SubjectDN.ToString());
                 var ski = new SubjectKeyIdentifierStructure(
                     cert.GetExtensionValue(X509Extensions.SubjectKeyIdentifier));
-                Assert.AreEqual(key.Id.ToBase58(), ski.GetKeyIdentifier().ToBase58());
+                Assert.Equals(key.Id.ToBase58(), ski.GetKeyIdentifier().ToBase58());
             }
             finally
             {
@@ -81,10 +81,10 @@ namespace Catalyst.Core.Lib.Tests.UnitTests.Cryptography
             try
             {
                 var cert = await _keyStoreService.CreateBcCertificateAsync("alice");
-                Assert.AreEqual($"CN={key.Id},OU=keystore,O=ipfs", cert.SubjectDN.ToString());
+                Assert.Equals($"CN={key.Id},OU=keystore,O=ipfs", cert.SubjectDN.ToString());
                 var ski = new SubjectKeyIdentifierStructure(
                     cert.GetExtensionValue(X509Extensions.SubjectKeyIdentifier));
-                Assert.AreEqual(key.Id.ToBase58(), ski.GetKeyIdentifier().ToBase58());
+                Assert.Equals(key.Id.ToBase58(), ski.GetKeyIdentifier().ToBase58());
             }
             finally
             {
@@ -99,10 +99,10 @@ namespace Catalyst.Core.Lib.Tests.UnitTests.Cryptography
             try
             {
                 var cert = await _keyStoreService.CreateBcCertificateAsync("alice");
-                Assert.AreEqual($"CN={key.Id},OU=keystore,O=ipfs", cert.SubjectDN.ToString());
+                Assert.Equals($"CN={key.Id},OU=keystore,O=ipfs", cert.SubjectDN.ToString());
                 var ski = new SubjectKeyIdentifierStructure(
                     cert.GetExtensionValue(X509Extensions.SubjectKeyIdentifier));
-                Assert.AreEqual(key.Id.ToBase58(), ski.GetKeyIdentifier().ToBase58());
+                Assert.Equals(key.Id.ToBase58(), ski.GetKeyIdentifier().ToBase58());
             }
             finally
             {

@@ -21,8 +21,10 @@
 
 #endregion
 
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
 using Catalyst.Core.Lib.Rpc.IO.Exceptions;
 using FluentAssertions;
 using NUnit.Framework;
@@ -40,13 +42,8 @@ namespace Catalyst.Modules.Network.Dotnetty.Tests.UnitTests.Rpc.IO.Exceptions
 
             var exceptionToString = exception.ToString();
 
-            var binaryFormatter = new BinaryFormatter();
-            using (var memoryStream = new MemoryStream())
-            {
-                binaryFormatter.Serialize(memoryStream, exception);
-                memoryStream.Seek(0, 0);
-                exception = (ResponseHandlerDoesNotExistException) binaryFormatter.Deserialize(memoryStream);
-            }
+            var json = JsonSerializer.Serialize(exception);
+            exception = JsonSerializer.Deserialize<ResponseHandlerDoesNotExistException>(json);
 
             exceptionToString.Should().Be(exception.ToString());
         }

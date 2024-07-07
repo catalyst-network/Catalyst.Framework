@@ -82,7 +82,7 @@ cn4oisOvxCprs4aM9UVjtZTCjfyNpX8UWwT1W3rySV+KQNhxuMy3RzmL
             var key = await _keyStoreService.ImportAsync("alice", alice, "mypassword".ToArray());
             try
             {
-                Assert.AreEqual(aliceKid, key.Id.ToString());
+                Assert.Equals(aliceKid, key.Id.ToString());
 
                 var cipher = Convert.FromBase64String(@"
 MIIBcwYJKoZIhvcNAQcDoIIBZDCCAWACAQAxgfowgfcCAQAwYDBbMQ0wCwYDVQQK
@@ -96,7 +96,7 @@ nHILFmhac/+a/StQOKuf9dx5qXeGvt9LnwKuGGSfNX4g+dTkoa6N
 ");
                 var plain = await _keyStoreService.ReadProtectedDataAsync(cipher);
                 var plainText = Encoding.UTF8.GetString(plain);
-                Assert.AreEqual("This is a message from Alice to Bob", plainText);
+                Assert.Equals("This is a message from Alice to Bob", plainText);
             }
             finally
             {
@@ -132,7 +132,7 @@ nHILFmhac/+a/StQOKuf9dx5qXeGvt9LnwKuGGSfNX4g+dTkoa6N
                 var data = new byte[] {1, 2, 3, 4};
                 var cipher = await _keyStoreService.CreateProtectedDataAsync("alice", data);
                 var plain = await _keyStoreService.ReadProtectedDataAsync(cipher);
-                Assert.AreEqual(data, plain);
+                Assert.Equals(data, plain);
             }
             finally
             {
@@ -149,7 +149,7 @@ nHILFmhac/+a/StQOKuf9dx5qXeGvt9LnwKuGGSfNX4g+dTkoa6N
                 var data = new byte[] {1, 2, 3, 4};
                 var cipher = await _keyStoreService.CreateProtectedDataAsync("alice", data);
                 var plain = await _keyStoreService.ReadProtectedDataAsync(cipher);
-                Assert.AreEqual(data, plain);
+                Assert.Equals(data, plain);
             }
             finally
             {

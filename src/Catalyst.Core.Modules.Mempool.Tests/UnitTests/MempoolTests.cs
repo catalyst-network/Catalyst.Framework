@@ -34,7 +34,7 @@ using Catalyst.Protocol.Wire;
 using Catalyst.TestUtils;
 using FluentAssertions;
 using MultiFormats.Registry;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;

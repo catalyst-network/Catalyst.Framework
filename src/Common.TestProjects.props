@@ -8,12 +8,12 @@
     </PropertyGroup>
     <Import Project="./Common.Projects.props"/>
     <ItemGroup>
-        <PackageReference Include="FluentAssertions" Version="5.10.3"/>
-        <PackageReference Include="NSubstitute" Version="4.2.1"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0"/>
-        <PackageReference Include="Microsoft.Reactive.Testing" Version="4.1.6"/>
-        <PackageReference Include="NUnit" Version="3.12.0"/>
-        <PackageReference Include="NUnit3TestAdapter" Version="3.16.1"/>
+        <PackageReference Include="FluentAssertions" Version="6.12.0"/>
+        <PackageReference Include="NSubstitute" Version="5.1.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0"/>
+        <PackageReference Include="Microsoft.Reactive.Testing" Version="6.0.1"/>
+        <PackageReference Include="NUnit" Version="4.1.0"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="coverlet.msbuild" Version="2.8.0">

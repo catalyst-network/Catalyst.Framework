@@ -74,38 +74,38 @@ namespace Catalyst.Core.Lib.Tests.UnitTests.IO.Codecs
         [Test]
         public void DatagramPacketEncoder_Can_Encode_IMessage_With_ProtobufEncoder()
         {
-            Assert.True(_channel.WriteOutbound(new SignedMessageDto(_protocolMessageSigned, _recipientPid)));
+            Assert.Equals(_channel.WriteOutbound(new SignedMessageDto(_protocolMessageSigned, _recipientPid)), true);
 
             var datagramPacket = _channel.ReadOutbound<DatagramPacket>();
-            Assert.NotNull(datagramPacket);
+            Assert.That(datagramPacket, Is.Not.Null);
 
-            Assert.AreEqual(_datagramPacket.Content, datagramPacket.Content);
-            Assert.AreEqual(_datagramPacket.Sender, datagramPacket.Sender);
-            Assert.AreEqual(_datagramPacket.Recipient, datagramPacket.Recipient);
+            Assert.Equals(_datagramPacket.Content, datagramPacket.Content);
+            Assert.Equals(_datagramPacket.Sender, datagramPacket.Sender);
+            Assert.Equals(_datagramPacket.Recipient, datagramPacket.Recipient);
             datagramPacket.Release();
-            Assert.False(_channel.Finish());
+            Assert.Equals(_channel.Finish(), false);
         }
 
         [Test]
         public void DatagramPacketEncoder_Will_Not_Encode_UnmatchedMessageType()
         {
-            Assert.True(_channel.WriteOutbound(_protocolMessageSigned));
+            Assert.Equals(_channel.WriteOutbound(_protocolMessageSigned), true);
 
             var protocolMessageSigned = _channel.ReadOutbound<ProtocolMessage>();
-            Assert.NotNull(protocolMessageSigned);
-            Assert.AreSame(_protocolMessageSigned, protocolMessageSigned);
-            Assert.False(_channel.Finish());
+            Assert.That(protocolMessageSigned, Is.Not.Null);
+            Assert.Equals(_protocolMessageSigned, protocolMessageSigned);
+            Assert.Equals(_channel.Finish(), false);
         }
 
         [Test]
         public void DatagramPacketEncoder_Will_Not_Encode_UnmatchedType()
         {
             const string expected = "junk";
-            Assert.True(_channel.WriteOutbound(expected));
+            Assert.Equals(_channel.WriteOutbound(expected), true);
 
             var content = _channel.ReadOutbound<string>();
-            Assert.AreSame(expected, content);
-            Assert.False(_channel.Finish());
+            Assert.Equals(expected, content);
+            Assert.Equals(_channel.Finish(), false);
         }
     }
 }

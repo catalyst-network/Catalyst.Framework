@@ -47,7 +47,7 @@ using MultiFormats;
 using MultiFormats.Registry;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using NUnit.Framework;
 using Catalyst.Core.Modules.Kvm;
 
