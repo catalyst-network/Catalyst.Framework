@@ -26,7 +26,7 @@ using Lib.P2P;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
 
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Nethermind.Serialization.Json;
 using Newtonsoft.Json;
 
@@ -59,8 +59,8 @@ namespace Catalyst.Abstractions.Kvm.Models
         [JsonConverter(typeof(AddressConverter))]
         public Address Miner { get; set; }
         
-        [JsonConverter(typeof(KeccakConverter))]
-        public Keccak MixHash { get; set; }
+        [JsonConverter(typeof(CidJsonConverter))]
+        public Hash256 MixHash { get; set; }
         
         [JsonConverter(typeof(ByteArrayConverter))]
         public byte[] Nonce { get; set; }
@@ -71,11 +71,11 @@ namespace Catalyst.Abstractions.Kvm.Models
         [JsonConverter(typeof(CidJsonConverter))]
         public Cid ParentHash { get; set; }
         
-        [JsonConverter(typeof(KeccakConverter))]
-        public Keccak ReceiptsRoot { get; set; }
+        [JsonConverter(typeof(CidJsonConverter))]
+        public Hash256 ReceiptsRoot { get; set; }
         
-        [JsonConverter(typeof(KeccakConverter))]
-        public Keccak Sha3Uncles { get; set; }
+        [JsonConverter(typeof(CidJsonConverter))]
+        public Hash256 Sha3Uncles { get; set; }
         
         [JsonConverter(typeof(ByteArrayConverter))]
         public byte[] Signature { get; set; }
@@ -83,8 +83,8 @@ namespace Catalyst.Abstractions.Kvm.Models
         [JsonConverter(typeof(LongConverter))]
         public long Size { get; set; }
         
-        [JsonConverter(typeof(KeccakConverter))]
-        public Keccak StateRoot { get; set; }
+        [JsonConverter(typeof(CidJsonConverter))]
+        public Hash256 StateRoot { get; set; }
         
         [JsonConverter(typeof(NullableLongConverter))]
         public long? Step { get; set; }
@@ -97,10 +97,10 @@ namespace Catalyst.Abstractions.Kvm.Models
         
         public IEnumerable<object> Transactions { get; set; }
         
-        [JsonConverter(typeof(KeccakConverter))]
-        public Keccak TransactionsRoot { get; set; }
+        [JsonConverter(typeof(CidJsonConverter))]
+        public Hash256 TransactionsRoot { get; set; }
         
-        [JsonProperty(ItemConverterType = typeof(KeccakConverter))]
-        public IEnumerable<Keccak> Uncles { get; set; }
+        [JsonProperty(ItemConverterType = typeof(CidJsonConverter))]
+        public IEnumerable<Hash256> Uncles { get; set; }
     }
 }

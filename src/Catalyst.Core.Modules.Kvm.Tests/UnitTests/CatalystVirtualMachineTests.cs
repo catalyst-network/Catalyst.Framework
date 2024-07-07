@@ -24,6 +24,7 @@
 using Catalyst.Core.Modules.Cryptography.BulletProofs;
 using Catalyst.Core.Modules.Hashing;
 using MultiFormats.Registry;
+using Nethermind.Core.Specs;
 using Nethermind.Evm;
 using Nethermind.Logging;
 using Nethermind.State;
@@ -39,13 +40,13 @@ namespace Catalyst.Core.Modules.Kvm.Tests.UnitTests
         public void Catalyst_virtual_machine_can_be_initialized()
         {
             var virtualMachine = new KatVirtualMachine(
-                Substitute.For<IStateProvider>(),
-                Substitute.For<IStorageProvider>(),
-                Substitute.For<IStateUpdateHashProvider>(),
-                new CatalystSpecProvider(),
+                Substitute.For<IWorldState>(),
+                Substitute.For<IBlockhashProvider>(),
+                Substitute.For<ISpecProvider>(),
                 new HashProvider(HashingAlgorithm.GetAlgorithmMetadata("keccak-256")),
-                new FfiWrapper(), 
-                LimboLogs.Instance);
+                new FfiWrapper(),
+                Substitute.For<ICodeInfoRepository>(),
+            LimboLogs.Instance);
             Assert.That(virtualMachine, Is.Not.Null);
         }
     }

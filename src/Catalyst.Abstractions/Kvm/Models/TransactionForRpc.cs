@@ -24,7 +24,7 @@
 using Lib.P2P;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Nethermind.Serialization.Json;
 using Newtonsoft.Json;
 
@@ -32,8 +32,8 @@ namespace Catalyst.Abstractions.Kvm.Models
 {
     public class TransactionForRpc
     {
-        [JsonConverter(typeof(KeccakConverter))]
-        public Keccak Hash { get; set; }
+        [JsonConverter(typeof(CidJsonConverter))]
+        public Hash256 Hash { get; set; }
 
         [JsonConverter(typeof(NullableUInt256Converter))]
         public UInt256? Nonce { get; set; }

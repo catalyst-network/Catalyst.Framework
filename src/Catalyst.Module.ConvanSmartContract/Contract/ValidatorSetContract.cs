@@ -23,8 +23,8 @@
 
 using Catalyst.Abstractions.Contract;
 using Nethermind.Abi;
+using Nethermind.Blockchain.Contracts.Json;
 using Nethermind.Core;
-using Nethermind.Serialization.Json.Abi;
 
 namespace Catalyst.Module.ConvanSmartContract.Contract
 {
@@ -33,8 +33,9 @@ namespace Catalyst.Module.ConvanSmartContract.Contract
         private readonly IAbiEncoder _abiEncoder;
         private readonly ICallableContractProxy _callableContractProxy;
 
-        internal static readonly AbiDefinition Definition = new AbiDefinitionParser().Parse<ValidatorSet>();
-        internal static readonly string GetValidatorsFunction = Definition.GetFunctionName(nameof(GetValidators));
+        // TODO TNA
+        internal static readonly AbiDefinition Definition = new AbiDefinitionParser().Parse(typeof(ValidatorSet));
+        internal static readonly string GetValidatorsFunction = Definition.GetFunction(nameof(GetValidators)).Name;
 
         public ValidatorSetContract(IAbiEncoder abiEncoder, ICallableContractProxy callableContractProxy)
         {

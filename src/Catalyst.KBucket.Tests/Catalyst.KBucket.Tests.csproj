@@ -6,6 +6,7 @@
         <IsPackable>false</IsPackable>
         <DebugType>full</DebugType>
         <RootNamespace>Catalyst.KBucket</RootNamespace>
+        <LangVersion>11.0</LangVersion>
     </PropertyGroup>
     
     <Import Project="../Common.TestProjects.props" />

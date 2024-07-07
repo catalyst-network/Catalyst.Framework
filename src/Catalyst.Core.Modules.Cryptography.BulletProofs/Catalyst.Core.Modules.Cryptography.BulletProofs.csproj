@@ -7,6 +7,7 @@
         <AssemblyOriginatorKeyFile>Catalyst.Core.Modules.Cryptography.BulletProofs.snk</AssemblyOriginatorKeyFile>
         <PublicSign>true</PublicSign>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>11.0</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;CS8002</NoWarn>

@@ -86,7 +86,7 @@ namespace Catalyst.Core.Modules.Ledger.Repository
             return false;
         }
 
-        public bool TryFind(Keccak transactionHash, out TransactionReceipt receipt)
+        public bool TryFind(Hash256 transactionHash, out TransactionReceipt receipt)
         {
             var id = transactionHash.AsDocumentId();
 
@@ -121,7 +121,7 @@ namespace Catalyst.Core.Modules.Ledger.Repository
             return false;
         }
 
-        public bool TryFind(Keccak transactionHash, out Cid deltaHash, out Delta delta, out int index)
+        public bool TryFind(Hash256 transactionHash, out Cid deltaHash, out Delta delta, out int index)
         {
             var id = transactionHash.AsDocumentId();
 

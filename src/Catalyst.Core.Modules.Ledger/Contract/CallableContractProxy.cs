@@ -31,7 +31,7 @@ using Google.Protobuf;
 using Lib.P2P;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Nethermind.Evm.Tracing;
 using Nethermind.State;
 
@@ -42,18 +42,16 @@ namespace Catalyst.Core.Modules.Ledger.Contract
         private readonly IDeltaHashProvider _deltaHashProvider;
         private readonly IDeltaCache _deltaCache;
         private readonly IDeltaExecutor _deltaExecutor;
-        private readonly IStateProvider _stateProvider;
-        private readonly IStorageProvider _storageProvider;
+        private readonly IWorldState _stateProvider;
 
         private static ulong DefaultContractGasLimit = 1_600_000L;
 
-        public CallableContractProxy(IDeltaHashProvider deltaHashProvider, IDeltaCache deltaCache, IDeltaExecutor deltaExecutor, IStateProvider stateProvider, IStorageProvider storageProvider)
+        public CallableContractProxy(IDeltaHashProvider deltaHashProvider, IDeltaCache deltaCache, IDeltaExecutor deltaExecutor, IWorldState stateProvider)
         {
             _deltaHashProvider = deltaHashProvider;
             _deltaCache = deltaCache;
             _deltaExecutor = deltaExecutor;
             _stateProvider = stateProvider;
-            _storageProvider = storageProvider;
         }
 
         public Delta CreateOneOffDelta(Cid cid, Delta delta, PublicEntry publicEntry)
@@ -88,7 +86,7 @@ namespace Catalyst.Core.Modules.Ledger.Contract
             var latestDeltaCid = _deltaHashProvider.GetLatestDeltaHash();
             _deltaCache.TryGetOrAddConfirmedDelta(latestDeltaCid, out Delta latestDelta);
 
-            Keccak root = latestDelta.StateRoot.ToKeccak();
+            Hash256 root = latestDelta.StateRoot.ToKeccak();
 
             var newDelta = CreateOneOffDelta(latestDeltaCid, latestDelta, transaction);
 
@@ -97,7 +95,6 @@ namespace Catalyst.Core.Modules.Ledger.Contract
             _stateProvider.StateRoot = root;
             _deltaExecutor.CallAndReset(newDelta, callOutputTracer);
             _stateProvider.Reset();
-            _storageProvider.Reset();
 
             return callOutputTracer.ReturnValue;
         }

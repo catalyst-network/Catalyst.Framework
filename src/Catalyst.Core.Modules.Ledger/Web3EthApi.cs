@@ -68,8 +68,7 @@ namespace Catalyst.Core.Modules.Ledger
             IDeltaResolver deltaResolver,
             IDeltaCache deltaCache,
             IDeltaExecutor executor,
-            IStorageProvider storageProvider,
-            IStateProvider stateProvider,
+            IWorldState stateProvider,
             ITransactionRepository receipts,
             ITransactionReceivedEvent transactionReceived,
             IPeerRepository peerRepository,
@@ -92,7 +91,6 @@ namespace Catalyst.Core.Modules.Ledger
             DeltaResolver = deltaResolver ?? throw new ArgumentNullException(nameof(deltaResolver));
             DeltaCache = deltaCache ?? throw new ArgumentNullException(nameof(deltaCache));
             Executor = executor ?? throw new ArgumentNullException(nameof(executor));
-            StorageProvider = storageProvider ?? throw new ArgumentNullException(nameof(storageProvider));
             StateProvider = stateProvider ?? throw new ArgumentNullException(nameof(stateProvider));
             DfsService = dfsService;
             SyncState = syncState;
@@ -103,12 +101,10 @@ namespace Catalyst.Core.Modules.Ledger
         public IDeltaCache DeltaCache { get; }
 
         public IDeltaExecutor Executor { get; }
-        public IStorageProvider StorageProvider { get; }
-        public IStateProvider StateProvider { get; }
+        public IWorldState StateProvider { get; }
         public IPeerRepository PeerRepository { get; }
 
-
-        public Keccak SendTransaction(PublicEntry publicEntry)
+        public Hash256 SendTransaction(PublicEntry publicEntry)
         {
             TransactionBroadcast broadcast = new TransactionBroadcast
             {
@@ -117,7 +113,8 @@ namespace Catalyst.Core.Modules.Ledger
 
             _transactionReceived.OnTransactionReceived(broadcast.ToProtocolMessage(_peerId), true);
 
-            byte[] kvmAddressBytes = Keccak.Compute(publicEntry.SenderAddress.ToByteArray()).Bytes.AsSpan(12).ToArray();
+            // byte[] kvmAddressBytes = Keccak.Compute(publicEntry.SenderAddress.ToByteArray()).Bytes.AsSpan(12).ToArray();
+            byte[] kvmAddressBytes = KeccakHash.ComputeHash(publicEntry.SenderAddress.ToByteArray()).ToArray().AsSpan(12).ToArray();
             string hex = kvmAddressBytes.ToHexString() ?? throw new ArgumentNullException("kvmAddressBytes.ToHexString()");
             publicEntry.SenderAddress = kvmAddressBytes.ToByteString();
 
@@ -134,12 +131,21 @@ namespace Catalyst.Core.Modules.Ledger
             return _mempoolRepository.Service.GetAll().Select(x=>x.ToProtoBuff<PublicEntryDao, PublicEntry>(_mapperProvider));
         }
 
-        public TransactionReceipt FindReceipt(Keccak transactionHash)
+        public TransactionReceipt FindReceipt(Cid transactionHash)
         {
-            return _receipts.TryFind(transactionHash, out TransactionReceipt receipt) ? receipt : default;
+            TransactionReceipt[] receipts;
+            bool bReceiptFound = _receipts.TryFind(transactionHash, out receipts);
+            
+            if (bReceiptFound)
+            {
+                return receipts[0];
+            }
+            else {
+                return default;
+            }
         }
 
-        public bool FindTransactionData(Keccak transactionHash, out Cid deltaHash, out Delta delta, out int index)
+        public bool FindTransactionData(Hash256 transactionHash, out Cid deltaHash, out Delta delta, out int index)
         {
             return _receipts.TryFind(transactionHash, out deltaHash, out delta, out index);
         }

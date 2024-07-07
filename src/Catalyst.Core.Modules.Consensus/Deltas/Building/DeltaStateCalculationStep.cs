@@ -33,11 +33,11 @@ namespace Catalyst.Core.Modules.Consensus.Deltas.Building
 {
     internal sealed class DeltaStateCalculationStep : IDeltaBuilderStep
     {
-        private readonly IStateProvider _stateProvider;
+        private readonly IWorldState _stateProvider;
         private readonly IDeltaExecutor _deltaExecutor;
         private readonly ILogger _logger;
 
-        public DeltaStateCalculationStep(IStateProvider stateProvider, IDeltaExecutor deltaExecutor, ILogger logger)
+        public DeltaStateCalculationStep(IWorldState stateProvider, IDeltaExecutor deltaExecutor, ILogger logger)
         {
             // note that this mus be a different state provider and a different executor
             _stateProvider = stateProvider ?? throw new ArgumentNullException(nameof(stateProvider));
@@ -48,7 +48,7 @@ namespace Catalyst.Core.Modules.Consensus.Deltas.Building
         public void Execute(DeltaBuilderContext context)
         {
             var previousRoot = context.PreviousDelta.StateRoot;
-            Keccak stateRoot = previousRoot.IsEmpty ? Keccak.EmptyTreeHash : new Keccak(previousRoot.ToByteArray());
+            Hash256 stateRoot = previousRoot.IsEmpty ? Keccak.EmptyTreeHash : new Hash256(previousRoot.ToByteArray());
             
             if (_logger.IsEnabled(LogEventLevel.Debug)) _logger.Error($"Running state calculation for delta {context.ProducedDelta.DeltaNumber}");
 

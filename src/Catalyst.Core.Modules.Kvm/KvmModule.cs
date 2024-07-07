@@ -32,13 +32,16 @@ using Catalyst.Core.Lib.FileSystem;
 using Catalyst.Core.Modules.Kvm.Validators;
 using Catalyst.Module.ConvanSmartContract.Contract;
 using Nethermind.Abi;
+using Nethermind.Core;
 using Nethermind.Core.Specs;
 using Nethermind.Db;
 using Nethermind.Db.Rocks;
 using Nethermind.Db.Rocks.Config;
 using Nethermind.Evm;
+using Nethermind.Evm.Tracing.GethStyle.Custom.JavaScript;
 using Nethermind.Logging;
 using Nethermind.State;
+using Nethermind.Trie.Pruning;
 
 namespace Catalyst.Core.Modules.Kvm
 {
@@ -55,22 +58,22 @@ namespace Catalyst.Core.Modules.Kvm
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<CatalystSpecProvider>().As<ISpecProvider>();
-
-            builder.RegisterType<StateUpdateHashProvider>().As<IStateUpdateHashProvider>().SingleInstance();
+            // TODO TNA
+            // builder.RegisterType<StateUpdateHashProvider>().As<IStateUpdateHashProvider>().SingleInstance();
 
             // builder.RegisterInstance(new OneLoggerLogManager(new SimpleConsoleLogger())).As<ILogManager>();
             builder.RegisterInstance(LimboLogs.Instance).As<ILogManager>();
 
             var catDir = new FileSystem().GetCatalystDataDir().FullName;
-            var codeDb = _useInMemoryDb ? new MemDb() : (IDb)new CodeRocksDb(catDir, DbConfig.Default);
-            var code = new StateDb(codeDb);
-            var stateDb = _useInMemoryDb ? new MemDb() : (IDb)new StateRocksDb(catDir, DbConfig.Default);
-            var state = new StateDb(stateDb);
+            // var codeDb = _useInMemoryDb ? new MemDb() : (IDb)new CodeRocksDb(catDir, DbConfig.Default);
+            // var code = new StateDb(codeDb);
+            // var stateDb = _useInMemoryDb ? new MemDb() : (IDb)new StateRocksDb(catDir, DbConfig.Default);
+            // var state = new StateDb(stateDb);
 
-            builder.RegisterInstance(code).As<IDb>().Named<IDb>("codeDb").SingleInstance();
-            builder.RegisterInstance(state).As<IDb>().Named<IDb>("stateDb").SingleInstance();
-            builder.RegisterInstance(code).As<ISnapshotableDb>().Named<ISnapshotableDb>("codeDb").SingleInstance();
-            builder.RegisterInstance(state).As<ISnapshotableDb>().Named<ISnapshotableDb>("stateDb").SingleInstance();
+            // builder.RegisterInstance(code).As<IDb>().Named<IDb>("codeDb").SingleInstance();
+            // builder.RegisterInstance(state).As<IDb>().Named<IDb>("stateDb").SingleInstance();
+            // builder.RegisterInstance(code).As<ISnapshotableDb>().Named<ISnapshotableDb>("codeDb").SingleInstance();
+            // builder.RegisterInstance(state).As<ISnapshotableDb>().Named<ISnapshotableDb>("stateDb").SingleInstance();
 
             //builder.RegisterInstance(new MemDb()).As<IDb>().SingleInstance();               // code db
             //builder.RegisterInstance(new StateDb()).As<ISnapshotableDb>().SingleInstance(); // state db
@@ -98,30 +101,38 @@ namespace Catalyst.Core.Modules.Kvm
         {
             var serviceName = Guid.NewGuid().ToString();
 
-            var stateProvider = new ByTypeNamedParameter<IStateProvider>(serviceName);
-            var storageProvider = new ByTypeNamedParameter<IStorageProvider>(serviceName);
+            var worldStateProvider = new ByTypeNamedParameter<IWorldState>(serviceName);
             var kvm = new ByTypeNamedParameter<IKvm>(serviceName);
             var executor = new ByTypeNamedParameter<IDeltaExecutor>(serviceName);
 
-            builder.RegisterType<StateProvider>().Named<IStateProvider>(serviceName).SingleInstance()
-            .WithStateDbParameters(builder);
+            var KeyValueStoreWithBatching = new ByTypeNamedParameter<IKeyValueStoreWithBatching>(serviceName);
 
-            builder.RegisterType<StorageProvider>().Named<IStorageProvider>(serviceName).SingleInstance()
-            .WithParameter(stateProvider)
-            .WithStateDbParameters(builder);
+            var trieStore = new ByTypeNamedParameter<ITrieStore>(serviceName);
+            var keyValueStore = new ByTypeNamedParameter<IKeyValueStore>(serviceName);
+            var logger = new ByTypeNamedParameter<ILogManager>(serviceName);
 
+            builder.RegisterType<Db>().Named<IKeyValueStoreWithBatching>(serviceName).SingleInstance();
+
+            builder.RegisterType<TrieStore>().Named<ITrieStore>(serviceName).SingleInstance()
+                .WithParameter(KeyValueStoreWithBatching);
+
+            // TODO TNA
+            // builder.RegisterType<KeyValueStore>().Named<IKeyValueStore>(serviceName).SingleInstance();
+            // builder.RegisterType<Logs>().Named<ILogManager>(serviceName).SingleInstance();
+
+            builder.RegisterType<WorldState>().Named<IWorldState>(serviceName).SingleInstance()
+               .WithParameter(trieStore)
+               .WithParameter(keyValueStore)
+               .WithParameter(logger);
             builder.RegisterType<KatVirtualMachine>().Named<IKvm>(serviceName).SingleInstance()
-               .WithParameter(stateProvider)
-               .WithParameter(storageProvider);
+               .WithParameter(worldStateProvider);
             builder.RegisterType<DeltaExecutor>().Named<IDeltaExecutor>(serviceName).SingleInstance()
-               .WithParameter(stateProvider)
-               .WithParameter(storageProvider)
+               .WithParameter(worldStateProvider)
                .WithParameter(kvm);
 
             // parameter registration
             registration
-               .WithParameter(stateProvider)
-               .WithParameter(storageProvider)
+               .WithParameter(worldStateProvider)
                .WithParameter(kvm)
                .WithParameter(executor);
 
@@ -131,10 +142,11 @@ namespace Catalyst.Core.Modules.Kvm
         public static IRegistrationBuilder<TLimit, TReflectionActivatorData, TStyle> WithStateDbParameters<TLimit, TReflectionActivatorData, TStyle>(this IRegistrationBuilder<TLimit, TReflectionActivatorData, TStyle> registration, ContainerBuilder builder)
     where TReflectionActivatorData : ReflectionActivatorData
         {
+            // TODO TNA
             registration
-            .WithParameter(new ResolvedParameter((p, ctx) => p.Name == "codeDb", (p, ctx) => ctx.ResolveNamed<ISnapshotableDb>("codeDb")))
+            // .WithParameter(new ResolvedParameter((p, ctx) => p.Name == "codeDb", (p, ctx) => ctx.ResolveNamed<ISnapshotableDb>("codeDb")))
             .WithParameter(new ResolvedParameter((p, ctx) => p.Name == "codeDb", (p, ctx) => ctx.ResolveNamed<IDb>("codeDb")))
-            .WithParameter(new ResolvedParameter((p, ctx) => p.Name == "stateDb", (p, ctx) => ctx.ResolveNamed<ISnapshotableDb>("stateDb")))
+            // .WithParameter(new ResolvedParameter((p, ctx) => p.Name == "stateDb", (p, ctx) => ctx.ResolveNamed<ISnapshotableDb>("stateDb")))
             .WithParameter(new ResolvedParameter((p, ctx) => p.Name == "stateDb", (p, ctx) => ctx.ResolveNamed<IDb>("stateDb")));
 
             return registration;

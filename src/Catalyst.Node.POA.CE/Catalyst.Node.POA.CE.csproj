@@ -11,6 +11,7 @@
         <PublicSign>true</PublicSign>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <RootNamespace>Catalyst.Node.POA.CE</RootNamespace>
+        <LangVersion>11.0</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;CS8002</NoWarn>

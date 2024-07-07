@@ -32,15 +32,15 @@ using Catalyst.Core.Lib.Extensions;
 using Lib.P2P;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Address = Nethermind.Core.Address;
 
 namespace Catalyst.Core.Modules.Web3.Controllers.Handlers
 {
     [EthWeb3RequestHandler("eth", "getBlockByHash")]
-    public class EthGetBlockByHashHandler : EthWeb3RequestHandler<Keccak, bool, BlockForRpc>
+    public class EthGetBlockByHashHandler : EthWeb3RequestHandler<Hash256, bool, BlockForRpc>
     {
-        protected override BlockForRpc Handle(Keccak deltaHash, bool includeFullTxs, IWeb3EthApi api)
+        protected override BlockForRpc Handle(Hash256 deltaHash, bool includeFullTxs, IWeb3EthApi api)
         {
             DeltaWithCid deltaWithCid = api.GetDeltaWithCid(deltaHash.ToCid());
             return BuildBlock(api, deltaWithCid, deltaWithCid.Delta.DeltaNumber, api.HashProvider, includeFullTxs);
@@ -72,7 +72,7 @@ namespace Catalyst.Core.Modules.Web3.Controllers.Handlers
                 Number = blockNumber,
                 GasLimit = (long)delta.GasLimit,
                 GasUsed = delta.GasUsed,
-                Timestamp = new UInt256(delta.TimeStamp.Seconds),
+                Timestamp = (UInt256)delta.TimeStamp.Seconds,
                 ParentHash = blockNumber == 0 ? null : Cid.Read(delta.PreviousDeltaDfsHash.ToByteArray()),
                 StateRoot = delta.StateRoot.ToKeccak(),
                 ReceiptsRoot = Keccak.EmptyTreeHash,
@@ -80,7 +80,7 @@ namespace Catalyst.Core.Modules.Web3.Controllers.Handlers
                 LogsBloom = Bloom.Empty,
                 MixHash = Keccak.Zero,
                 Nonce = nonce,
-                Uncles = new Keccak[0],
+                Uncles = new Hash256[0],
                 Transactions = includeFullTxs ? (IEnumerable<object>)api.ToTransactionsForRpc(deltaWithCid) : delta.PublicEntries.Select(x => x.GetHash(hashProvider))
             };
             blockForRpc.TotalDifficulty = (UInt256)((long)blockForRpc.Difficulty * (blockNumber + 1));

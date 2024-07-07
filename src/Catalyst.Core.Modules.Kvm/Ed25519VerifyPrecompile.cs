@@ -30,7 +30,7 @@ using Nethermind.Evm.Precompiles;
 
 namespace Catalyst.Core.Modules.Kvm
 {
-    public sealed class Ed25519VerifyPrecompile : IPrecompiledContract
+    public sealed class Ed25519VerifyPrecompile : IPrecompile
     {
         private readonly ICryptoContext _cryptoContext;
 
@@ -58,6 +58,16 @@ namespace Catalyst.Core.Modules.Kvm
             return _cryptoContext.Verify(signature, message, signingContext)
                 ? (new byte[] {1}, true)
                 : (new byte[] {0}, true);
+        }
+
+        long IPrecompile.DataGasCost(in ReadOnlyMemory<byte> inputData, IReleaseSpec releaseSpec)
+        {
+            throw new NotImplementedException();
+        }
+
+        (ReadOnlyMemory<byte>, bool) IPrecompile.Run(in ReadOnlyMemory<byte> inputData, IReleaseSpec releaseSpec)
+        {
+            throw new NotImplementedException();
         }
     }
 }

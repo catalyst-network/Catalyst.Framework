@@ -23,40 +23,53 @@
 
 using System;
 using Lib.P2P;
+using MongoDB.Bson;
 using MultiFormats;
 using Nethermind.Core.Crypto;
-
 using Nethermind.Serialization.Json;
-using Newtonsoft.Json;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Nethermind.Core.Extensions;
+using Nethermind.Evm.Tracing.GethStyle.Custom.JavaScript;
 
-namespace Catalyst.Abstractions.Kvm
+public class CidJsonConverter : JsonConverter<Cid>
 {
-    public class CidJsonConverter : JsonConverter<Cid>
+    public override Cid? Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options)
     {
-        static readonly KeccakConverter Converter = new KeccakConverter();
-
-        public override void WriteJson(JsonWriter writer, Cid value, JsonSerializer serializer)
+        var hash256 = ByteArrayConverter.Convert(ref reader);
+        if (hash256 == null)
         {
-            Converter.WriteJson(writer, ToKeccak(value), serializer);
+            return null;
         }
 
-        public override Cid ReadJson(JsonReader reader, Type objectType, Cid existingValue, bool hasExistingValue, JsonSerializer serializer)
+        return new Cid
         {
-            var keccak = Converter.ReadJson(reader, typeof(Keccak), ToKeccak(existingValue), hasExistingValue, serializer);
-            if (keccak == null)
-            {
-                return null;
-            }
-
-            return new Cid
-            {
-                Version = 1,
-                Encoding = "base32",
-                ContentType = "dag-pb",
-                Hash = new MultiHash("blake2b-256", keccak.Bytes)
-            };
-        }
-
-        static Keccak ToKeccak(Cid value) { return value == null ? null : new Keccak(value.Hash.Digest); }
+            Version = 1,
+            Encoding = "base32",
+            ContentType = "dag-pb",
+            Hash = new MultiHash("blake2b-256", hash256.ToBytes())
+        };
     }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        Cid cid,
+        JsonSerializerOptions options)
+    {
+        if (cid == null)
+        {
+            writer.WriteNullValue();
+            return;
+        }
+        else
+        {
+            writer.WriteRawValue(ToHash256(cid).Bytes.ToHexString(true));
+        }
+    }
+
+    static Hash256 ToHash256(Cid value) { return value == null ? null : new Hash256(value.Hash.Digest); }
 }

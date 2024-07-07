@@ -46,11 +46,10 @@ using FluentAssertions;
 using Google.Protobuf;
 using Lib.P2P;
 using MultiFormats.Registry;
-using Nethereum.Hex.HexConvertors.Extensions;
 using Nethermind.Core.Crypto;
 using Nethermind.Core.Specs;
 using Nethermind.Db;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Nethermind.Logging;
 using Nethermind.State;
 using NSubstitute;
@@ -59,6 +58,11 @@ using ILogger = Serilog.ILogger;
 using MultiFormats;
 using Catalyst.Abstractions.Config;
 using Catalyst.Core.Lib.Config;
+using Nethermind.Evm;
+using Nethermind.Blockchain;
+using Common.Logging;
+using Nethermind.Trie.Pruning;
+using Catalyst.TestUtils.Repository.TreeBuilder;
 
 namespace Catalyst.Core.Modules.Consensus.Tests.UnitTests.Deltas
 {
@@ -73,7 +77,7 @@ namespace Catalyst.Core.Modules.Consensus.Tests.UnitTests.Deltas
         private CoinbaseEntry _zeroCoinbaseEntry;
         private IDeltaCache _cache;
         private IDateTimeProvider _dateTimeProvider;
-        private IStateProvider _stateProvider;
+        private IWorldState _stateProvider;
         private IDeltaExecutor _deltaExecutor;
         private ICryptoContext _cryptoContext;
         private IDeltaConfig _deltaConfig;
@@ -93,7 +97,7 @@ namespace Catalyst.Core.Modules.Consensus.Tests.UnitTests.Deltas
 
             _randomFactory = Substitute.For<IDeterministicRandomFactory>();
             _randomFactory.GetDeterministicRandomFromSeed(Arg.Any<byte[]>())
-               .Returns(ci => new IsaacRandom(((byte[]) ci[0]).ToHex()));
+               .Returns(ci => new IsaacRandom(((byte[]) ci[0]).ToHexString()));
 
             _producer = MultiAddressHelper.GetAddress("producer");
             _peerSettings = _producer.ToSubstitutedPeerSettings();
@@ -120,21 +124,29 @@ namespace Catalyst.Core.Modules.Consensus.Tests.UnitTests.Deltas
             _dateTimeProvider = new DateTimeProvider();
 
             IDb codeDb = new MemDb();
-            ISnapshotableDb stateDb = new StateDb();
+//            ISnapshotableDb stateDb = new StateDb();
             ISpecProvider specProvider = new CatalystSpecProvider();
             _cryptoContext = new FfiWrapper();
-            _stateProvider = new StateProvider(stateDb, codeDb, LimboLogs.Instance);
-            IStorageProvider storageProvider = new StorageProvider(stateDb, _stateProvider, LimboLogs.Instance);
+            IDbProvider dbProvider = TestMemDbProvider.Init();
+            NoErrorLimboLogs logManager = NoErrorLimboLogs.Instance;
+            IDb stateDb = dbProvider.StateDb;
+            TrieStore trieStore = new(stateDb, LimboLogs.Instance);
+            StateReader stateReader = new(trieStore, codeDb, logManager);
+            WorldState stateProvider = new(trieStore, codeDb, logManager);
+            ICodeInfoRepository codeInfoRepository = new CodeInfoRepository((stateProvider as IPreBlockCaches)?.Caches.PrecompileCache);
+
+            BlockTree tree = Build.A.BlockTree().WithoutSettingHead.TestObject;
+            BlockhashProvider blockhashProvider = new(tree, specProvider, stateProvider, LimboLogs.Instance);
+
             KatVirtualMachine virtualMachine = new KatVirtualMachine(_stateProvider,
-                storageProvider,
-                new StateUpdateHashProvider(),
+                blockhashProvider,
                 specProvider,
                 new HashProvider(HashingAlgorithm.GetAlgorithmMetadata("keccak-256")),
-                new FfiWrapper(), 
+            new FfiWrapper(),
+                 codeInfoRepository,
                 LimboLogs.Instance);
             _deltaExecutor = new DeltaExecutor(specProvider,
                 _stateProvider,
-                storageProvider,
                 virtualMachine,
                 _cryptoContext,
                 _logger);

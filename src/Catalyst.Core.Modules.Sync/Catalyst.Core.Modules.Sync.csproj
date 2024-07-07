@@ -3,6 +3,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>Catalyst.Core.Modules.Sync</RootNamespace>
         <Authors>James Kirby (nshcore@protonmail.com)</Authors>
+        <LangVersion>11.0</LangVersion>
     </PropertyGroup>
     <Import Project="../Common.Packable.props" />
     <Import Project="../Common.Projects.props" />

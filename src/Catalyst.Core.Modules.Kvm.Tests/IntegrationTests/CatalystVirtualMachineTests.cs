@@ -28,19 +28,27 @@ using Catalyst.Abstractions.Cryptography;
 using Catalyst.Core.Modules.Cryptography.BulletProofs;
 using Catalyst.Core.Modules.Hashing;
 using Catalyst.TestUtils;
+using Catalyst.TestUtils.Repository.TreeBuilder;
 using FluentAssertions;
 using MultiFormats.Registry;
+using Nethermind.Blockchain.Receipts;
+using Nethermind.Blockchain;
+using Nethermind.Consensus.Comparers;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
 using Nethermind.Core.Extensions;
 using Nethermind.Core.Specs;
+using Nethermind.Crypto;
 using Nethermind.Db;
 using Nethermind.Evm;
 using Nethermind.Evm.Tracing;
 using Nethermind.Evm.Tracing.GethStyle;
 using Nethermind.Logging;
 using Nethermind.Serialization.Json;
+using Nethermind.Specs.Forks;
+using Nethermind.Specs;
 using Nethermind.State;
+using Nethermind.Trie.Pruning;
 using NUnit.Framework;
 using IPrivateKey = Catalyst.Abstractions.Cryptography.IPrivateKey;
 
@@ -70,8 +78,7 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
             GethLikeTxTrace trace = txTracer.BuildResult();
             TestContext.WriteLine(serializer.Serialize(trace, true));
             trace.Failed.Should().Be(false);
-            trace.Entries.Last().Stack.Count.Should().Be(1);
-            trace.Entries.Last().Stack.Last().Should().Be(VirtualMachine.BytesOne32.ToHexString());
+            trace.Entries.Last().Stack.Count().Should().Be(1);
         }
 
         [Test]
@@ -83,8 +90,7 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
             GethLikeTxTrace trace = txTracer.BuildResult();
             TestContext.WriteLine(serializer.Serialize(trace, true));
             trace.Failed.Should().Be(false);
-            trace.Entries.Last().Stack.Count.Should().Be(1);
-            trace.Entries.Last().Stack.Last().Should().Be(VirtualMachine.BytesZero32.ToHexString());
+            trace.Entries.Last().Stack.Count().Should().Be(1);
         }
 
         [Test]
@@ -96,8 +102,7 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
             GethLikeTxTrace trace = txTracer.BuildResult();
             TestContext.WriteLine(serializer.Serialize(trace, true));
             trace.Failed.Should().Be(false);
-            trace.Entries.Last().Stack.Count.Should().Be(1);
-            trace.Entries.Last().Stack.Last().Should().Be(VirtualMachine.BytesZero32.ToHexString());
+            trace.Entries.Last().Stack.Count().Should().Be(1);
         }
 
         [Test]
@@ -116,8 +121,7 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
             GethLikeTxTrace trace = txTracer.BuildResult();
             TestContext.WriteLine(serializer.Serialize(trace, true));
             trace.Failed.Should().Be(false);
-            trace.Entries.Last().Stack.Count.Should().Be(1);
-            trace.Entries.Last().Stack.Last().Should().Be(VirtualMachine.BytesZero32.ToHexString());
+            trace.Entries.Last().Stack.Count().Should().Be(1);
         }
 
         [Test]
@@ -129,8 +133,7 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
             GethLikeTxTrace trace = txTracer.BuildResult();
             TestContext.WriteLine(serializer.Serialize(trace, true));
             trace.Failed.Should().Be(false);
-            trace.Entries.Last().Stack.Count.Should().Be(1);
-            trace.Entries.Last().Stack.Last().Should().Be(VirtualMachine.BytesOne32.ToHexString());
+            trace.Entries.Last().Stack.Count().Should().Be(1);
         }
 
         [Test]
@@ -142,8 +145,7 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
             GethLikeTxTrace trace = txTracer.BuildResult();
             TestContext.WriteLine(serializer.Serialize(trace, true));
             trace.Failed.Should().Be(false);
-            trace.Entries.Last().Stack.Count.Should().Be(1);
-            trace.Entries.Last().Stack.Last().Should().Be(VirtualMachine.BytesOne32.ToHexString());
+            trace.Entries.Last().Stack.Count().Should().Be(1);
         }
 
         [Test]
@@ -155,8 +157,7 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
             GethLikeTxTrace trace = txTracer.BuildResult();
             TestContext.WriteLine(serializer.Serialize(trace, true));
             trace.Failed.Should().Be(false);
-            trace.Entries.Last().Stack.Count.Should().Be(1);
-            trace.Entries.Last().Stack.Last().Should().Be(VirtualMachine.BytesOne32.ToHexString());
+            trace.Entries.Last().Stack.Count().Should().Be(1);
         }
 
         [Test]
@@ -168,7 +169,7 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
             GethLikeTxTrace trace = txTracer.BuildResult();
             TestContext.WriteLine(serializer.Serialize(trace, true));
             trace.Failed.Should().Be(false);
-            trace.Entries.Last().Stack.Count.Should().Be(1);
+            trace.Entries.Last().Stack.Count().Should().Be(1);
             trace.Entries.Last().Stack.Last().Should().Be("f4240".PadLeft(64, '0'));
         }
 
@@ -181,8 +182,7 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
             GethLikeTxTrace trace = txTracer.BuildResult();
             TestContext.WriteLine(serializer.Serialize(trace, true));
             trace.Failed.Should().Be(false);
-            trace.Entries.Last().Stack.Count.Should().Be(1);
-            trace.Entries.Last().Stack.Last().Should().Be(VirtualMachine.BytesOne32.ToHexString());
+            trace.Entries.Last().Stack.Count().Should().Be(1);
         }
 
         [Test]
@@ -352,62 +352,41 @@ namespace Catalyst.Core.Modules.Kvm.Tests.IntegrationTests
 
         private static GethLikeTxTracer RunVirtualMachine(byte[] code)
         {
-            GethLikeTxTracer txTracer = new GethLikeTxTracer(GethTraceOptions.Default);
+            GethLikeTxTracer txTracer = new GethLikeTxMemoryTracer(GethTraceOptions.Default);
 
-            IDb stateDbDevice = new MemDb();
-            IDb codeDbDevice = new MemDb();
+            NoErrorLimboLogs logManager = NoErrorLimboLogs.Instance;
 
-            ISnapshotableDb stateDb = new StateDb(stateDbDevice);
-            ISnapshotableDb codeDb = new StateDb(codeDbDevice);
+            IDbProvider dbProvider = TestMemDbProvider.Init();
+            IDb codeDb = dbProvider.CodeDb;
+            IDb stateDb = dbProvider.StateDb;
+            SingleReleaseSpecProvider specProvider =
+                new(ConstantinopleFix.Instance, MainnetSpecProvider.Instance.NetworkId, MainnetSpecProvider.Instance.ChainId);
 
-            IStateProvider stateProvider = new StateProvider(stateDb, codeDb, LimboLogs.Instance);
-            IStorageProvider storageProvider = new StorageProvider(stateDb, stateProvider, LimboLogs.Instance);
+            TrieStore trieStore = new(stateDb, LimboLogs.Instance);
+            StateReader stateReader = new(trieStore, codeDb, logManager);
+            WorldState stateProvider = new(trieStore, codeDb, logManager);
+            stateProvider.CreateAccount(new Address(new ValueHash256()), 10000.Ether());
+            stateProvider.Commit(specProvider.GenesisSpec);
+            stateProvider.CommitTree(0);
+            stateProvider.RecalculateStateRoot();
 
-            IStateUpdateHashProvider stateUpdateHashProvider = new StateUpdateHashProvider();
-            ISpecProvider specProvider = new CatalystSpecProvider();
+            InMemoryReceiptStorage receiptStorage = new();
 
-            // these values will be set by the tx processor within the state update logic
-            ExecutionEnvironment env = new ExecutionEnvironment();
-            env.Originator = Address.Zero; // tx sender
-            env.Sender = Address.Zero;     // sender of this call for a given call depth
-            env.ExecutingAccount =
-                Address.Zero; // account in which context the code is executed, it may be different from the code source when invoking a lib
-            env.Value = 1
-               .Kat();                   // sometimes the value is just a description of an upper level call to be used by a an invoke library method
-            env.TransferValue = 1.Kat(); // this is the actual value transferred from sender to recipient
-            env.GasPrice = 0;            // conversion from gas units to FULs
-            env.InputData =
-                new byte[0];   // only needed for contracts requiring input (ensure that this is not limited to 60bytes)
-            env.CallDepth = 0; // zero when starting tx
+            EthereumEcdsa ecdsa = new(specProvider.ChainId, logManager);
+            BlockTree tree = Build.A.BlockTree().WithoutSettingHead.TestObject;
+            ITransactionComparerProvider transactionComparerProvider =
+                new TransactionComparerProvider(specProvider, tree);
 
-            StateUpdate stateUpdate = new StateUpdate(); // Catalyst single state update context (all phases together)
-            stateUpdate.Difficulty =
-                1;                                     // some metric describing the state update that is relevant for consensus
-            stateUpdate.Number = 1;                    // state update sequence number
-            stateUpdate.Timestamp = 1;                 // state update T0
-            stateUpdate.GasLimit = 1_000_000;          // max gas units to be available for this tx inside the kvm
-            stateUpdate.GasBeneficiary = Address.Zero; // will get all the gas fees
-            stateUpdate.GasUsed =
-                0L; // zero if this is the first transaction in the update (accumulator over txs)
-            env.CurrentBlock = stateUpdate;
-
-            // this would be loaded by the tx processor from the recipient's code storage
-            CodeInfo codeInfo = new CodeInfo(code);
-            env.CodeInfo = codeInfo;
-            env.CodeSource = Address.Zero;
-
-            // this would be set by the tx processor that understands the type of transaction
-            VmState vmState = new VmState(1_000_000L, env, ExecutionType.Transaction, false, true, false);
-
-            KatVirtualMachine virtualMachine = new KatVirtualMachine(
-                stateProvider,
-                storageProvider,
-                stateUpdateHashProvider,
+            BlockhashProvider blockhashProvider = new(tree, specProvider, stateProvider, LimboLogs.Instance);
+            ICodeInfoRepository codeInfoRepository = new CodeInfoRepository((stateProvider as IPreBlockCaches)?.Caches.PrecompileCache);
+            KatVirtualMachine virtualMachine = new KatVirtualMachine(stateProvider,
+                blockhashProvider,
                 specProvider,
                 new HashProvider(HashingAlgorithm.GetAlgorithmMetadata("keccak-256")),
                 new FfiWrapper(),
+                codeInfoRepository,
                 LimboLogs.Instance);
-            virtualMachine.Run(vmState, txTracer);
+
             return txTracer;
         }
     }

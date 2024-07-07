@@ -24,11 +24,12 @@
 using Nethermind.Core;
 using Nethermind.Core.Specs;
 using Nethermind.Evm.Precompiles;
+using System;
 
 namespace Catalyst.Core.Modules.Kvm
 {
     /// <inheritdoc />
-    public sealed class RangeProofPrecompile : IPrecompiledContract
+    public sealed class RangeProofPrecompile : IPrecompile
     {
         /// <inheritdoc />
         /// <summary>
@@ -50,5 +51,15 @@ namespace Catalyst.Core.Modules.Kvm
 
         /// <inheritdoc />
         public (byte[], bool) Run(byte[] inputData) { return (new byte[32], true); }
+
+        public long DataGasCost(in ReadOnlyMemory<byte> inputData, IReleaseSpec releaseSpec)
+        {
+            throw new NotImplementedException();
+        }
+
+        public (ReadOnlyMemory<byte>, bool) Run(in ReadOnlyMemory<byte> inputData, IReleaseSpec releaseSpec)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

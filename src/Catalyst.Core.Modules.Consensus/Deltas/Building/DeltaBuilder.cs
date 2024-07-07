@@ -48,7 +48,7 @@ namespace Catalyst.Core.Modules.Consensus.Deltas.Building
         private readonly MultiAddress _producerUniqueId;
         private readonly IDeltaCache _deltaCache;
         private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly IStateProvider _stateProvider;
+        private readonly IWorldState _stateProvider;
         private readonly IDeltaExecutor _deltaExecutor;
         private readonly IDeltaConfig _deltaConfig;
         private readonly ITransactionConfig _transactionConfig;
@@ -60,7 +60,7 @@ namespace Catalyst.Core.Modules.Consensus.Deltas.Building
             IPeerSettings peerSettings,
             IDeltaCache deltaCache,
             IDateTimeProvider dateTimeProvider,
-            IStateProvider stateProvider,
+            IWorldState stateProvider,
             IDeltaExecutor deltaExecutor,
             IDeltaConfig deltaConfig,
             ITransactionConfig transactionConfig,

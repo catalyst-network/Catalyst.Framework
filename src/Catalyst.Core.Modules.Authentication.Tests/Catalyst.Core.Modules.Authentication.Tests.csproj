@@ -8,6 +8,7 @@
         <AssemblyOriginatorKeyFile>Catalyst.Core.Modules.Authentication.Tests.snk</AssemblyOriginatorKeyFile>
         <PublicSign>true</PublicSign>
         <OutputType>Library</OutputType>
+        <LangVersion>11.0</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

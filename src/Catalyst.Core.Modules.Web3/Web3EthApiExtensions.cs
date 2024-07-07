@@ -35,7 +35,7 @@ using Google.Protobuf.WellKnownTypes;
 using Lib.P2P;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Nethermind.Evm.Tracing;
 
 namespace Catalyst.Core.Modules.Web3
@@ -92,11 +92,12 @@ namespace Catalyst.Core.Modules.Web3
             return true;
         }
 
-        public static PublicEntry ToPublicEntry(this IWeb3EthApi api, TransactionForRpc transactionCall, Keccak root)
+        public static PublicEntry ToPublicEntry(this IWeb3EthApi api, TransactionForRpc transactionCall, Hash256 root)
         {
             return new PublicEntry
             {
-                Nonce = (ulong)api.StateReader.GetNonce(root, transactionCall.From),
+                // TODO TNA
+                // Nonce = (ulong)api.StateReader.GetNonce(root, transactionCall.From),
                 SenderAddress = transactionCall.From.Bytes.ToByteString(),
                 ReceiverAddress = transactionCall.To?.Bytes.ToByteString() ?? ByteString.Empty,
                 GasLimit = (ulong)transactionCall.Gas.GetValueOrDefault(),
@@ -173,7 +174,7 @@ namespace Catalyst.Core.Modules.Web3
         public static CallOutputTracer CallAndRestore(this IWeb3EthApi api, TransactionForRpc transactionCall, DeltaWithCid deltaWithCid)
         {
             var parentDelta = deltaWithCid.Delta;
-            Keccak root = parentDelta.StateRoot.ToKeccak();
+            Hash256 root = parentDelta.StateRoot.ToKeccak();
 
             if (transactionCall.Gas == null)
             {
@@ -189,7 +190,8 @@ namespace Catalyst.Core.Modules.Web3
             api.StateProvider.StateRoot = root;
             api.Executor.CallAndReset(newDelta, callOutputTracer);
             api.StateProvider.Reset();
-            api.StorageProvider.Reset();
+            // TODO TNA
+            // api.StorageProvider.Reset();
             return callOutputTracer;
         }
     }

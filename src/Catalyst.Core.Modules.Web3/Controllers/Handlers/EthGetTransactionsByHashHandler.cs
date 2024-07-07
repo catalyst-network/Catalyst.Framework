@@ -23,14 +23,15 @@
 
 using Catalyst.Abstractions.Kvm.Models;
 using Catalyst.Abstractions.Ledger;
+using Catalyst.Core.Lib.Extensions;
 using Nethermind.Core.Crypto;
 
 namespace Catalyst.Core.Modules.Web3.Controllers.Handlers 
 {
     [EthWeb3RequestHandler("eth", "getTransactionByHash")]
-    public class EthGetTransactionsByHashHandler : EthWeb3RequestHandler<Keccak, TransactionForRpc>
+    public class EthGetTransactionsByHashHandler : EthWeb3RequestHandler<Hash256, TransactionForRpc>
     {
-        protected override TransactionForRpc Handle(Keccak transactionHash, IWeb3EthApi api)
+        protected override TransactionForRpc Handle(Hash256 transactionHash, IWeb3EthApi api)
         {
             if (api.FindTransactionData(transactionHash, out var deltaHash, out var delta, out var index))
             {

@@ -58,10 +58,9 @@ namespace Catalyst.Core.Modules.Ledger
     {
         public IAccountRepository Accounts { get; }
         private readonly IDeltaExecutor _deltaExecutor;
-        private readonly IStateProvider _stateProvider;
-        private readonly IStorageProvider _storageProvider;
-        private readonly ISnapshotableDb _stateDb;
-        private readonly ISnapshotableDb _codeDb;
+        private readonly IWorldState _stateProvider;
+        private readonly IDb _stateDb;
+        private readonly IDb _codeDb;
         private readonly ITransactionRepository _receipts;
         private readonly IMempool<PublicEntryDao> _mempool;
         private readonly IMapperProvider _mapperProvider;
@@ -84,10 +83,9 @@ namespace Catalyst.Core.Modules.Ledger
         public bool IsSynchonising => Monitor.IsEntered(_synchronisationLock);
 
         public Ledger(IDeltaExecutor deltaExecutor,
-            IStateProvider stateProvider,
-            IStorageProvider storageProvider,
-            ISnapshotableDb stateDb,
-            ISnapshotableDb codeDb,
+            IWorldState stateProvider,
+            IDb stateDb,
+            IDb codeDb,
             IAccountRepository accounts,
             IDeltaIndexService deltaIndexService,
             ITransactionRepository receipts,
@@ -101,7 +99,6 @@ namespace Catalyst.Core.Modules.Ledger
             Accounts = accounts;
             _deltaExecutor = deltaExecutor;
             _stateProvider = stateProvider;
-            _storageProvider = storageProvider;
 
             _stateDb = stateDb;
             _codeDb = codeDb;
@@ -195,6 +192,8 @@ namespace Catalyst.Core.Modules.Ledger
 
         private void UpdateLedgerFromDelta(Cid deltaHash)
         {
+            // TODO TNA
+            /*
             var stateSnapshot = _stateDb.TakeSnapshot();
             if (stateSnapshot != -1)
             {
@@ -206,7 +205,7 @@ namespace Catalyst.Core.Modules.Ledger
                         deltaHash);
                 }
             }
-
+            */
             var snapshotStateRoot = _stateProvider.StateRoot;
 
             try
@@ -229,9 +228,8 @@ namespace Catalyst.Core.Modules.Ledger
                 // add here a receipts tracer or similar, depending on what data needs to be stored for each contract
 
                 _stateProvider.Reset();
-                _storageProvider.Reset();
 
-                _stateProvider.StateRoot = new Keccak(parentDelta.StateRoot?.ToByteArray());
+                _stateProvider.StateRoot = new Hash256(parentDelta.StateRoot?.ToByteArray());
                 _deltaExecutor.Execute(nextDeltaInChain, tracer);
 
                 // store receipts
@@ -240,8 +238,8 @@ namespace Catalyst.Core.Modules.Ledger
                     _receipts.Put(deltaHash, tracer.Receipts.ToArray(), nextDeltaInChain.PublicEntries.ToArray());
                 }
 
-                _stateDb.Commit();
-                _codeDb.Commit();
+                // _stateDb.Commit();
+                // _codeDb.Commit();
 
                 _latestKnownDelta = deltaHash;
 
@@ -249,7 +247,7 @@ namespace Catalyst.Core.Modules.Ledger
             }
             catch
             {
-                Restore(stateSnapshot, snapshotStateRoot);
+                // Restore(stateSnapshot, snapshotStateRoot);
             }
         }
 
@@ -262,15 +260,14 @@ namespace Catalyst.Core.Modules.Ledger
             _synchroniser.UpdateState((ulong)_latestKnownDeltaNumber);
         }
 
-        private void Restore(int stateSnapshot, Keccak snapshotStateRoot)
+        private void Restore(int stateSnapshot, Hash256 snapshotStateRoot)
         {
             if (_logger.IsEnabled(LogEventLevel.Verbose))
             {
                 _logger.Verbose("Reverting deltas {stateRoot}", _stateProvider.StateRoot);
             }
-
-            _stateDb.Restore(stateSnapshot);
-            _storageProvider.Reset();
+            // TODO TNA
+            // _stateDb.Restore(stateSnapshot);
             _stateProvider.Reset();
             _stateProvider.StateRoot = snapshotStateRoot;
             if (_logger.IsEnabled(LogEventLevel.Verbose))

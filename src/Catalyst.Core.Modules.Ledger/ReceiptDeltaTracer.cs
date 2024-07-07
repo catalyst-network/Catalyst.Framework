@@ -31,7 +31,7 @@ using Google.Protobuf;
 using Lib.P2P;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Nethermind.Evm;
 using Nethermind.Evm.Tracing;
 using Nethermind.State;
@@ -59,11 +59,11 @@ namespace Catalyst.Core.Modules.Ledger
         public bool IsTracingReceipt => true;
 
         public bool IsTracingBlockHash => false;
-        public void MarkAsSuccess(Address recipient, long gasSpent, byte[] output, LogEntry[] logs, Keccak _) { _txReceipts.Add(BuildReceipt(recipient, gasSpent, StatusCode.Success, logs)); }
+        public void MarkAsSuccess(Address recipient, long gasSpent, byte[] output, LogEntry[] logs, Hash256 _) { _txReceipts.Add(BuildReceipt(recipient, gasSpent, StatusCode.Success, logs)); }
 
-        public void MarkAsFailed(Address recipient, long gasSpent, byte[] output, string error, Keccak _) { _txReceipts.Add(BuildFailedReceipt(recipient, gasSpent)); }
+        public void MarkAsFailed(Address recipient, long gasSpent, byte[] output, string error, Hash256 _) { _txReceipts.Add(BuildFailedReceipt(recipient, gasSpent)); }
 
-        private TransactionReceipt BuildFailedReceipt(Address recipient, long gasSpent) { return BuildReceipt(recipient, gasSpent, StatusCode.Failure, LogEntry.EmptyLogs); }
+        private TransactionReceipt BuildFailedReceipt(Address recipient, long gasSpent) { return BuildReceipt(recipient, gasSpent, StatusCode.Failure, new LogEntry[1]); }
 
         private TransactionReceipt BuildReceipt(Address recipient, long spentGas, byte statusCode, LogEntry[] logEntries)
         {
@@ -106,6 +106,15 @@ namespace Catalyst.Core.Modules.Ledger
         public bool IsTracingCode => false;
         public bool IsTracingStack => false;
         public bool IsTracingState => false;
+
+        public bool IsTracingAccess => throw new NotImplementedException();
+
+        public bool IsTracingFees => throw new NotImplementedException();
+
+        public bool IsTracingLogs => throw new NotImplementedException();
+
+        public bool IsTracingStorage => throw new NotImplementedException();
+
         public void ReportBalanceChange(Address address, UInt256? before, UInt256? after) { throw new NotImplementedException(); }
         public void ReportCodeChange(Address address, byte[] before, byte[] after) { throw new NotImplementedException(); }
         public void ReportNonceChange(Address address, UInt256? before, UInt256? after) { throw new NotImplementedException(); }
@@ -137,10 +146,105 @@ namespace Catalyst.Core.Modules.Ledger
         public void ReportActionEnd(long gas, byte[] output) { throw new NotImplementedException(); }
         public void ReportActionError(EvmExceptionType evmExceptionType) { throw new NotImplementedException(); }
         public void ReportActionEnd(long gas, Address deploymentAddress, byte[] deployedCode) { throw new NotImplementedException(); }
-        public void ReportBlockHash(Keccak blockHash) { throw new NotImplementedException(); }
+        public void ReportBlockHash(Hash256 blockHash) { throw new NotImplementedException(); }
         public void ReportByteCode(byte[] byteCode) { throw new NotImplementedException(); }
         public void ReportGasUpdateForVmTrace(long refund, long gasAvailable) { throw new NotImplementedException(); }
         public void ReportRefund(long gasAvailable) { throw new NotImplementedException(); }
         public void ReportExtraGasPressure(long extraGasPressure) { throw new NotImplementedException(); }
+
+        public void SetOperationStorage(Address address, Nethermind.Int256.UInt256 storageIndex, ReadOnlySpan<byte> newValue, ReadOnlySpan<byte> currentValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void LoadOperationStorage(Address address, Nethermind.Int256.UInt256 storageIndex, ReadOnlySpan<byte> value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportAction(long gas, Nethermind.Int256.UInt256 value, Address from, Address to, ReadOnlyMemory<byte> input, ExecutionType callType, bool isPrecompileCall = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportAccess(IReadOnlySet<Address> accessedAddresses, IReadOnlySet<StorageCell> accessedStorageCells)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportFees(Nethermind.Int256.UInt256 fees, Nethermind.Int256.UInt256 burntFees)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportStorageChange(in ReadOnlySpan<byte> key, in ReadOnlySpan<byte> value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportStorageChange(in StorageCell storageCell, byte[] before, byte[] after)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportStorageRead(in StorageCell storageCell)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportByteCode(ReadOnlyMemory<byte> byteCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        void ITxTracer.StartOperation(int pc, Instruction opcode, long gas, in ExecutionEnvironment env)
+        {
+            throw new NotImplementedException();
+        }
+
+        void ITxTracer.ReportLog(LogEntry log)
+        {
+            throw new NotImplementedException();
+        }
+
+        void ITxTracer.ReportActionRevert(long gasLeft, ReadOnlyMemory<byte> output)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetOperationStack(TraceStack stack)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportStackPush(in ReadOnlySpan<byte> stackItem)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetOperationMemory(TraceMemory memoryTrace)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportMemoryChange(long offset, in ReadOnlySpan<byte> data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportActionEnd(long gas, ReadOnlyMemory<byte> output)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReportActionEnd(long gas, Address deploymentAddress, ReadOnlyMemory<byte> deployedCode)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -22,14 +22,15 @@
 #endregion
 
 using System;
+using Nethermind.Core;
 using Nethermind.Evm;
 
 namespace Catalyst.Core.Modules.Kvm
 {
     /// <inheritdoc />
-    public sealed class StateUpdateHashProvider : IStateUpdateHashProvider
+    public sealed class StateUpdateHashProvider
     {
         /// <inheritdoc />
-        public byte[] GetHash(StateUpdate stateUpdate, in long number) { throw new NotImplementedException(); }
+        public byte[] GetHash(BlockHeader stateUpdate, in long number) { throw new NotImplementedException(); }
     }
 }

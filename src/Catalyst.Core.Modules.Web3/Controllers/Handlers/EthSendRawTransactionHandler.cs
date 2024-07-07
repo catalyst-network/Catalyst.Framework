@@ -33,7 +33,7 @@ using Google.Protobuf.WellKnownTypes;
 using Nethermind.Core;
 using Nethermind.Core.Crypto;
 using Nethermind.Crypto;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Nethermind.Logging;
 using Nethermind.Serialization.Rlp;
 using Nethermind.Specs;
@@ -41,20 +41,21 @@ using Nethermind.Specs;
 namespace Catalyst.Core.Modules.Web3.Controllers.Handlers
 {
     [EthWeb3RequestHandler("eth", "sendRawTransaction")]
-    public class EthSendRawTransactionHandler : EthWeb3RequestHandler<byte[], Keccak>
+    public class EthSendRawTransactionHandler : EthWeb3RequestHandler<byte[], Hash256>
     {
-        protected override Keccak Handle(byte[] transaction, IWeb3EthApi api)
+        protected override Hash256 Handle(byte[] transaction, IWeb3EthApi api)
         {
             PublicEntry publicEntry;
             try
             {
                 Transaction tx = Rlp.Decode<Transaction>(transaction);
-                EthereumEcdsa ecdsa = new EthereumEcdsa(MainnetSpecProvider.Instance, LimboLogs.Instance);
-                tx.SenderAddress = ecdsa.RecoverAddress(tx, MainnetSpecProvider.IstanbulBlockNumber);
+                EthereumEcdsa ecdsa = new EthereumEcdsa(MainnetSpecProvider.Instance.ChainId, LimboLogs.Instance);
+                tx.SenderAddress = ecdsa.RecoverAddress(tx, false);
                 tx.Timestamp = (UInt256) DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
                 publicEntry = new PublicEntry
                 {
-                    Data = (tx.Data ?? tx.Init).ToByteString(),
+                    Data = tx.Data.HasValue ? tx.Data.Value.ToArray().ToByteString() : ByteString.Empty,
                     GasLimit = (ulong) tx.GasLimit,
                     GasPrice = tx.GasPrice.ToUint256ByteString(),
                     Nonce = (ulong) tx.Nonce,

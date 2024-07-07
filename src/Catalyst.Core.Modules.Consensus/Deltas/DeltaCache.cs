@@ -65,33 +65,19 @@ namespace Catalyst.Core.Modules.Consensus.Deltas
             IMemoryCache memoryCache,
             IDeltaDfsReader dfsReader,
             IDeltaCacheChangeTokenProvider changeTokenProvider,
-            IStorageProvider storageProvider,
-            IStateProvider stateProvider,
-            ISnapshotableDb stateDb,
-            ISnapshotableDb codeDb,
+            IWorldState stateProvider,
             IDeltaIndexService deltaIndexService,
             ILogger logger)
         {
             _deltaIndexService = deltaIndexService;
-            _dfsReader = dfsReader;
-            _logger = logger;
-            _entryOptions = () => new MemoryCacheEntryOptions()
-               .AddExpirationToken(changeTokenProvider.GetChangeToken())
-               .RegisterPostEvictionCallback(EvictionCallback);
-
-            _memoryCache = memoryCache;
 
             stateProvider.CreateAccount(TruffleTestAccount, 1_000_000_000.Kat());
             stateProvider.CreateAccount(CatalystTruffleTestAccount, 1_000_000_000.Kat());
 
-            storageProvider.Commit();
             stateProvider.Commit(CatalystGenesisSpec.Instance);
 
-            storageProvider.CommitTrees();
-            stateProvider.CommitTree();
-
-            stateDb.Commit();
-            codeDb.Commit();
+            // TODO
+            //            stateProvider.CommitTree((long)deltaIndexService.LatestDeltaIndex().Height);
 
             var genesisDelta = new Delta
             {
@@ -99,7 +85,16 @@ namespace Catalyst.Core.Modules.Consensus.Deltas
                 StateRoot = ByteString.CopyFrom(stateProvider.StateRoot.Bytes),
             };
 
+
             GenesisHash = hashProvider.ComputeMultiHash(genesisDelta).ToCid();
+
+            _dfsReader = dfsReader;
+            _logger = logger;
+            _entryOptions = () => new MemoryCacheEntryOptions()
+               .AddExpirationToken(changeTokenProvider.GetChangeToken())
+               .RegisterPostEvictionCallback(EvictionCallback);
+
+            _memoryCache = memoryCache;
             _memoryCache.Set(GenesisHash, genesisDelta);
         }
 

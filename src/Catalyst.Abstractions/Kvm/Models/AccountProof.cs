@@ -22,7 +22,7 @@
 #endregion
 
 using Nethermind.Core.Crypto;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 
 namespace Catalyst.Abstractions.Kvm.Models 
 {
@@ -32,11 +32,11 @@ namespace Catalyst.Abstractions.Kvm.Models
 
         public UInt256 Balance { get; set; }
 
-        public Keccak CodeHash { get; set; }
+        public Hash256 CodeHash { get; set; }
 
         public UInt256 Nonce { get; set; }
 
-        public Keccak StorageRoot { get; set; }
+        public Hash256 StorageRoot { get; set; }
 
         public StorageProof[] StorageProofs { get; set; }
     }

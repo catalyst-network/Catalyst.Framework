@@ -8,6 +8,7 @@
     </PropertyGroup>
     <PropertyGroup>
         <RootNamespace>Catalyst.Modules.POA.P2P.Tests</RootNamespace>
+        <LangVersion>11.0</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
       <NoWarn>1701;1702;VSTHRD200;CS8002</NoWarn>

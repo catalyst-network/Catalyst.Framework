@@ -23,6 +23,7 @@
 
 using Catalyst.Abstractions.Types;
 using Nethermind.Core.Specs;
+using Nethermind.Int256;
 
 namespace Catalyst.Core.Modules.Kvm
 {
@@ -31,8 +32,30 @@ namespace Catalyst.Core.Modules.Kvm
         public IReleaseSpec GenesisSpec => CatalystGenesisSpec.Instance;
         public IReleaseSpec GetSpec(long blockNumber) { return GenesisSpec; }
 
+        void ISpecProvider.UpdateMergeTransitionInfo(long? blockNumber, UInt256? terminalTotalDifficulty)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        IReleaseSpec ISpecProvider.GetSpec(ForkActivation forkActivation)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public long? DaoBlockNumber => null;
         public int ChainId => NetworkTypes.Dev.Id; // @TODO should we not be using protocol.common.network?
         public long[] TransitionBlocks { get; } = {0};
+
+        ForkActivation? ISpecProvider.MergeBlockNumber => throw new System.NotImplementedException();
+
+        ulong ISpecProvider.TimestampFork => throw new System.NotImplementedException();
+
+        UInt256? ISpecProvider.TerminalTotalDifficulty => throw new System.NotImplementedException();
+
+        ulong ISpecProvider.NetworkId => throw new System.NotImplementedException();
+
+        ulong ISpecProvider.ChainId => throw new System.NotImplementedException();
+
+        ForkActivation[] ISpecProvider.TransitionActivations => throw new System.NotImplementedException();
     }
 }

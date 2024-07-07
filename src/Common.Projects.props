@@ -7,7 +7,7 @@
         <RepositoryUrl>https://github.com/Catalyst-network/Catalyst.Node</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <RuntimeFrameworkVersion>3.0.0</RuntimeFrameworkVersion>
-        <LangVersion>8.0</LangVersion>
+        <LangVersion>11.0</LangVersion>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <Deterministic>true</Deterministic>
         <PlatformTarget>AnyCPU</PlatformTarget>

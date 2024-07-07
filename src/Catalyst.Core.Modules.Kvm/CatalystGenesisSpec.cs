@@ -24,7 +24,7 @@
 using System.Threading;
 using Nethermind.Core;
 using Nethermind.Core.Specs;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Nethermind.Specs.Forks;
 
 namespace Catalyst.Core.Modules.Kvm
@@ -152,6 +152,69 @@ namespace Catalyst.Core.Modules.Kvm
 
         /// <inheritdoc />
         public bool IsEip2200Enabled { get; } = Istanbul.Instance.IsEip2200Enabled;
+
+        public bool IsEip2537Enabled { get; } = Istanbul.Instance.IsEip2537Enabled;
+
+        public string Name => Istanbul.Instance.Name;
+
+        public long? FixedDifficulty => Istanbul.Instance.FixedDifficulty;
+
+        public bool IsEip2565Enabled => Istanbul.Instance.IsEip2565Enabled;
+
+        public bool IsEip2929Enabled => Istanbul.Instance.IsEip2929Enabled;
+
+        public bool IsEip2930Enabled => Istanbul.Instance.IsEip2930Enabled;
+
+        public bool IsEip3198Enabled => Istanbul.Instance.IsEip3198Enabled;
+
+        public bool IsEip3529Enabled => Istanbul.Instance.IsEip3529Enabled;
+
+        public bool IsEip3541Enabled => Istanbul.Instance.IsEip3541Enabled;
+
+        public bool IsEip3607Enabled => Istanbul.Instance.IsEip3607Enabled;
+
+        public bool IsEip3651Enabled => Istanbul.Instance.IsEip3651Enabled;
+
+        public bool IsEip1153Enabled => Istanbul.Instance.IsEip1153Enabled;
+
+        public bool IsEip3855Enabled => Istanbul.Instance.IsEip3855Enabled;
+
+        public bool IsEip5656Enabled => Istanbul.Instance.IsEip5656Enabled;
+
+        public bool IsEip3860Enabled => Istanbul.Instance.IsEip3860Enabled;
+
+        public bool IsEip4895Enabled => Istanbul.Instance.IsEip4895Enabled;
+
+        public bool IsEip4844Enabled => Istanbul.Instance.IsEip4844Enabled;
+
+        public bool IsEip4788Enabled => Istanbul.Instance.IsEip4788Enabled;
+
+        public Address Eip4788ContractAddress => Istanbul.Instance.Eip4788ContractAddress;
+
+        public bool IsEip2935Enabled => Istanbul.Instance.IsEip2935Enabled;
+
+        public bool IsEip7709Enabled => Istanbul.Instance.IsEip7709Enabled;
+
+        public Address Eip2935ContractAddress => Istanbul.Instance.Eip2935ContractAddress;
+
+        public bool IsEip6780Enabled => Istanbul.Instance.IsEip6780Enabled;
+
+        public bool IsRip7212Enabled => Istanbul.Instance.IsRip7212Enabled;
+
+        public ulong WithdrawalTimestamp => Istanbul.Instance.WithdrawalTimestamp;
+
+        public ulong Eip4844TransitionTimestamp => Istanbul.Instance.Eip4844TransitionTimestamp;
+
+        public bool IsEip1559Enabled => Istanbul.Instance.IsEip1559Enabled;
+
+        public long Eip1559TransitionBlock => Istanbul.Instance.Eip1559TransitionBlock;
+
+        public UInt256 ForkBaseFee => Istanbul.Instance.ForkBaseFee;
+
+        public UInt256 BaseFeeMaxChangeDenominator => Istanbul.Instance.BaseFeeMaxChangeDenominator;
+
+        public long ElasticityMultiplier => Istanbul.Instance.ElasticityMultiplier;
+
 
         /// <inheritdoc />
         public bool IsEip158IgnoredAccount(Address address) { return address == Address.SystemUser; }

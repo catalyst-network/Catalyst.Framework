@@ -58,7 +58,7 @@ using Nethermind.Core.Crypto;
 using Nethermind.Core.Extensions;
 using Nethermind.Core.Specs;
 using Nethermind.Db;
-using Nethermind.Dirichlet.Numerics;
+using Nethermind.Int256;
 using Nethermind.Evm;
 using Nethermind.Evm.Tracing;
 using Nethermind.Logging;
@@ -67,6 +67,12 @@ using NSubstitute;
 using NUnit.Framework;
 using SharpRepository.InMemoryRepository;
 using ILogger = Serilog.ILogger;
+using Nethermind.Trie.Pruning;
+using Nethermind.Specs.Forks;
+using Nethermind.Specs;
+using Nethermind.Blockchain;
+using static Catalyst.TestUtils.Repository.TreeBuilder.TestItem;
+using Catalyst.TestUtils.Repository.TreeBuilder;
 
 namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
 {
@@ -80,16 +86,15 @@ namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
         private IMapperProvider _mapperProvider;
         private ISpecProvider _specProvider;
         private TestScheduler _testScheduler;
-        private StateProvider _stateProvider;
+        private WorldState _stateProvider;
         private ICryptoContext _cryptoContext;
         private IAccountRepository _fakeRepository;
         private IDeltaHashProvider _deltaHashProvider;
         private ISynchroniser _synchroniser;
         private IMempool<PublicEntryDao> _mempool;
         private IDeltaExecutor _deltaExecutor;
-        private IStorageProvider _storageProvider;
-        private ISnapshotableDb _stateDb;
-        private ISnapshotableDb _codeDb;
+        private IDb _stateDb;
+        private IDb _codeDb;
         private IDeltaByNumberRepository _deltaByNumber;
         private IPrivateKey _senderPrivateKey;
         private IPublicKey _senderPublicKey;
@@ -120,18 +125,32 @@ namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
             var stateDbDevice = new MemDb();
             var codeDbDevice = new MemDb();
 
-            _stateDb = new StateDb(stateDbDevice);
-            _codeDb = new StateDb(codeDbDevice);
+            IDbProvider dbProvider = TestMemDbProvider.Init();
+            IDb codeDb = dbProvider.CodeDb;
+            IDb stateDb = dbProvider.StateDb;
+            SingleReleaseSpecProvider specProvider =
+                new(ConstantinopleFix.Instance, MainnetSpecProvider.Instance.NetworkId, MainnetSpecProvider.Instance.ChainId);
 
-            _stateProvider = new StateProvider(_stateDb, _codeDb, LimboLogs.Instance);
-            _storageProvider = new StorageProvider(_stateDb, _stateProvider, LimboLogs.Instance);
+            NoErrorLimboLogs logManager = NoErrorLimboLogs.Instance;
+
+            TrieStore trieStore = new(stateDb, LimboLogs.Instance);
+            StateReader stateReader = new(trieStore, codeDb, logManager);
+            WorldState stateProvider = new(trieStore, codeDb, logManager);
+            stateProvider.CreateAccount(new Address(new ValueHash256()), 10000.Ether());
+            stateProvider.Commit(specProvider.GenesisSpec);
+            stateProvider.CommitTree(0);
+            stateProvider.RecalculateStateRoot();
+
 
             var stateUpdateHashProvider = new StateUpdateHashProvider();
             _specProvider = new CatalystSpecProvider();
 
-            var kvm = new KatVirtualMachine(_stateProvider, _storageProvider, stateUpdateHashProvider, _specProvider, _hashProvider, _cryptoContext,
+            BlockTree tree = Build.A.BlockTree().WithoutSettingHead.TestObject;
+            BlockhashProvider blockhashProvider = new(tree, specProvider, stateProvider, LimboLogs.Instance);
+            ICodeInfoRepository codeInfoRepository = new CodeInfoRepository((stateProvider as IPreBlockCaches)?.Caches.PrecompileCache);
+            var kvm = new KatVirtualMachine(_stateProvider, blockhashProvider, _specProvider, _hashProvider, _cryptoContext, codeInfoRepository,
                 LimboLogs.Instance);
-            _deltaExecutor = new DeltaExecutor(_specProvider, _stateProvider, _storageProvider, kvm, new FfiWrapper(),
+            _deltaExecutor = new DeltaExecutor(_specProvider, _stateProvider, kvm, new FfiWrapper(),
                 _logger);
 
             _deltaIndexService = new DeltaIndexService(new InMemoryRepository<DeltaIndexDao, string>());
@@ -181,7 +200,7 @@ namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
             _deltaHashProvider.DeltaHashUpdates.Returns(updates.Select(h => (Cid) h).ToObservable(_testScheduler));
 
             // do not remove - it registers with observable so there is a reference to this object held until the test is ended
-            var _ = new Ledger(_deltaExecutor, _stateProvider, _storageProvider, _stateDb, _codeDb,
+            var _ = new Ledger(_deltaExecutor, _stateProvider, _stateDb, _codeDb,
                 _fakeRepository, _deltaIndexService, _receipts, _deltaHashProvider, _synchroniser, _mempool, _mapperProvider, _hashProvider, _logger);
 
             _testScheduler.Start();
@@ -195,7 +214,7 @@ namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
             _stateProvider.CreateAccount(recipient.ToKvmAddress(), UInt256.Zero);
             _stateProvider.RecalculateStateRoot();
             _stateProvider.Commit(CatalystGenesisSpec.Instance);
-            _stateProvider.CommitTree();
+            _stateProvider.CommitTree(1);
 
             var delta = new Delta
             {
@@ -223,7 +242,7 @@ namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
             _stateProvider.CreateAccount(_senderAddress, 1000);
             _stateProvider.CreateAccount(recipient.ToKvmAddress(), UInt256.Zero);
             _stateProvider.Commit(CatalystGenesisSpec.Instance);
-            _stateProvider.CommitTree();
+            _stateProvider.CommitTree(1);
 
             var delta = new Delta
             {
@@ -250,7 +269,7 @@ namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
         {
             _stateProvider.CreateAccount(_senderAddress, 1000);
             _stateProvider.Commit(CatalystGenesisSpec.Instance);
-            _stateProvider.CommitTree();
+            _stateProvider.CommitTree(1);
 
             var contractAddress = ContractAddress.From(_senderAddress, _stateProvider.GetNonce(_senderAddress));
 
@@ -288,7 +307,7 @@ namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
         {
             _stateProvider.CreateAccount(_senderAddress, 1000);
             _stateProvider.Commit(CatalystGenesisSpec.Instance);
-            _stateProvider.CommitTree();
+            _stateProvider.CommitTree(1);
             
             var contractAddress1 = ContractAddress.From(_senderAddress,
                 _stateProvider.GetNonce(_senderAddress) + 0);
@@ -354,7 +373,7 @@ namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
         {
             _stateProvider.CreateAccount(_senderAddress, 1000);
             _stateProvider.Commit(CatalystGenesisSpec.Instance);
-            _stateProvider.CommitTree();
+            _stateProvider.CommitTree(1);
             
             var contractAddress1 = ContractAddress.From(_senderAddress,
                 _stateProvider.GetNonce(_senderAddress));
@@ -431,11 +450,9 @@ namespace Catalyst.Core.Modules.Ledger.Tests.IntegrationTests
             _stateProvider.GetAccount(_senderAddress).Nonce.Should().Be(5);
 
             // need to commit changes as the next two calls are reverting changes on the same state provider
-            _storageProvider.Commit();
             _stateProvider.RecalculateStateRoot();
-            _stateProvider.Commit(_specProvider.GetSpec(1));
-            _storageProvider.CommitTrees();
-            _stateProvider.CommitTree();
+            _stateProvider.Commit(_specProvider.GenesisSpec);
+            _stateProvider.CommitTree(1);
 
             // balance should be 500_000 0x7a120
             var balanceOf1 = "70a08231000000000000000000000000" +
